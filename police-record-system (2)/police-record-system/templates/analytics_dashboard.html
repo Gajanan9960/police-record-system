@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics - Police Record System{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+            <h2 class="text-3xl font-bold text-cyan-400">Analytics & Insights</h2>
+            <p class="text-slate-400 text-sm">Key metrics, trends, and workloads across cases, incidents, and FIRs.</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <a href="{{ url_for('cases') }}" class="text-sm text-cyan-400 hover:text-cyan-200">View Cases</a>
+            <a href="{{ url_for('view_records') }}" class="text-sm text-cyan-400 hover:text-cyan-200">View Records</a>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="bg-slate-900 border border-slate-700 rounded-lg p-6">
+            <p class="text-sm text-slate-400">Total Cases</p>
+            <p class="text-3xl font-bold text-cyan-400">{{ total_cases }}</p>
+            <p class="text-xs text-slate-500 mt-1">Open {{ open_cases }} | In Progress {{ in_progress_cases }} | Closed {{ closed_cases }}</p>
+        </div>
+        <div class="bg-slate-900 border border-slate-700 rounded-lg p-6">
+            <p class="text-sm text-slate-400">Avg Case Age (hrs)</p>
+            <p class="text-3xl font-bold text-orange-300">{{ average_case_age or 'N/A' }}</p>
+            <p class="text-xs text-slate-500 mt-1">Since case opened</p>
+        </div>
+        <div class="bg-slate-900 border border-slate-700 rounded-lg p-6">
+            <p class="text-sm text-slate-400">Total Reports</p>
+            <p class="text-3xl font-bold text-cyan-400">{{ total_records }}</p>
+            <p class="text-xs text-slate-500 mt-1">Pending {{ pending_records }}</p>
+        </div>
+        <div class="bg-slate-900 border border-slate-700 rounded-lg p-6">
+            <p class="text-sm text-slate-400">Evidence Density</p>
+            {% set avg_evidence = (evidence_per_case|length and (evidence_per_case|sum(attribute='evidence_count') / (evidence_per_case|length))) %}
+            <p class="text-3xl font-bold text-green-400">{{ avg_evidence|round(1) if avg_evidence else '0.0' }}</p>
+            <p class="text-xs text-slate-500 mt-1">Average evidence items per case</p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-slate-900 border border-slate-700 rounded-lg p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-xl font-bold text-white">Incident Trend</h3>
+                <span class="text-xs text-slate-500">by month</span>
+            </div>
+            {% if incident_trend %}
+            <ul class="space-y-2 text-sm text-slate-300">
+                {% for point in incident_trend %}
+                <li class="flex justify-between border-b border-slate-800 pb-1">
+                    <span>{{ point.month }}</span>
+                    <span class="font-semibold">{{ point[1] }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p class="text-slate-400 text-sm">No incidents logged yet.</p>
+            {% endif %}
+        </div>
+
+        <div class="bg-slate-900 border border-slate-700 rounded-lg p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-xl font-bold text-white">FIR Throughput</h3>
+                <span class="text-xs text-slate-500">submissions per month</span>
+            </div>
+            {% if fir_counts %}
+            <ul class="space-y-2 text-sm text-slate-300">
+                {% for point in fir_counts %}
+                <li class="flex justify-between border-b border-slate-800 pb-1">
+                    <span>{{ point.month }}</span>
+                    <span class="font-semibold">{{ point[1] }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p class="text-slate-400 text-sm">No FIRs filed yet.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-slate-900 border border-slate-700 rounded-lg p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-xl font-bold text-white">Officer Workload</h3>
+                <span class="text-xs text-slate-500">assigned cases</span>
+            </div>
+            {% if officer_workload %}
+            <ul class="space-y-2 text-sm text-slate-300">
+                {% for officer, count in officer_workload %}
+                <li class="flex justify-between border-b border-slate-800 pb-1">
+                    <span>{{ officer }}</span>
+                    <span class="font-semibold">{{ count }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p class="text-slate-400 text-sm">No assignments recorded.</p>
+            {% endif %}
+        </div>
+
+        <div class="bg-slate-900 border border-slate-700 rounded-lg p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-xl font-bold text-white">Incidents vs Evidence</h3>
+                <span class="text-xs text-slate-500">per case</span>
+            </div>
+            <div class="space-y-3 text-sm text-slate-300">
+                {% for case_id, count in incidents_per_case %}
+                <div class="border border-slate-800 rounded p-3">
+                    <p class="text-xs text-slate-500 mb-1">Case ID {{ case_id }}</p>
+                    <div class="flex justify-between">
+                        <span>Incidents</span>
+                        <span class="font-semibold">{{ count }}</span>
+                    </div>
+                    {% set evidence_count = 0 %}
+                    {% for cid, ecount in evidence_per_case %}
+                        {% if cid == case_id %}
+                            {% set evidence_count = ecount %}
+                        {% endif %}
+                    {% endfor %}
+                    <div class="flex justify-between">
+                        <span>Evidence</span>
+                        <span class="font-semibold">{{ evidence_count }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+                {% if not incidents_per_case %}
+                <p class="text-slate-400 text-sm">No cases to analyze yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

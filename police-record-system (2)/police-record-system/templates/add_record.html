@@ -1,0 +1,273 @@
+{% extends "base.html" %}
+
+{% block title %}File New Report - Police Record System{% endblock %}
+
+{% block content %}
+{% set values = form_data or {} %}
+<div class="max-w-3xl mx-auto">
+    <div class="mb-6 text-center">
+        <h2
+            class="text-4xl font-bold bg-gradient-to-r from-cyan-400 to-cyan-300 bg-clip-text text-transparent flex items-center justify-center">
+            <i class="fas fa-file-pen mr-3"></i>File New Police Report
+        </h2>
+        <p class="text-slate-400 mt-2">Complete all fields to file a new incident report</p>
+    </div>
+
+    <div class="bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 rounded-xl p-8 shadow-lg">
+        <form method="POST" id="recordForm" class="space-y-6">
+            <!-- Row 1 -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-semibold text-slate-300 mb-2">
+                        <i class="fas fa-hashtag mr-2 text-cyan-400"></i>Case Number
+                    </label>
+                    <input type="text" name="case_number" placeholder="Auto-generated" readonly
+                        value="{{ values.get('case_number', '') }}"
+                        class="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg text-slate-500 cursor-not-allowed focus:outline-none">
+                    <p class="text-xs text-slate-500 mt-1">Auto-generated upon submission.</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-300 mb-2">
+                        <i class="fas fa-triangle-exclamation mr-2 text-red-400"></i>Severity
+                    </label>
+                    <select name="severity" required
+                        class="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all duration-300">
+                        <option value="">Select severity level</option>
+                        <option value="low" {% if values.get('severity')=='low' %}selected{% endif %}>Low</option>
+                        <option value="medium" {% if values.get('severity')=='medium' %}selected{% endif %}>Medium
+                        </option>
+                        <option value="high" {% if values.get('severity')=='high' %}selected{% endif %}>High</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Case Type & Section -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-semibold text-slate-300 mb-2">
+                        <i class="fas fa-folder mr-2 text-cyan-400"></i>Case Type
+                    </label>
+                    <select id="caseType"
+                        class="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all duration-300"
+                        onchange="updateSection()">
+                        <option value="">Select Type</option>
+                        {% for type, section in case_types.items() %}
+                        <option value="{{ type }}" data-section="{{ section }}">{{ type }}</option>
+                        {% endfor %}
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-300 mb-2">
+                        <i class="fas fa-book mr-2 text-cyan-400"></i>Applicable Section
+                    </label>
+                    <input type="text" id="sectionInput" placeholder="Auto-filled"
+                        class="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all duration-300">
+                </div>
+            </div>
+
+            <!-- Title -->
+            <div>
+                <label class="block text-sm font-semibold text-slate-300 mb-2">
+                    <i class="fas fa-heading mr-2 text-cyan-400"></i>Report Title
+                </label>
+                <input type="text" name="title" required placeholder="Brief description of incident"
+                    value="{{ values.get('title', '') }}"
+                    class="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all duration-300">
+            </div>
+
+            <!-- Description -->
+            <div>
+                <label class="block text-sm font-semibold text-slate-300 mb-2">
+                    <i class="fas fa-align-left mr-2 text-cyan-400"></i>Detailed Description
+                </label>
+                <textarea name="description" required rows="4"
+                    placeholder="Provide a detailed description of the incident"
+                    class="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all duration-300 resize-none">{{ values.get('description', '') }}</textarea>
+            </div>
+
+            <!-- Suspect Row -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-semibold text-slate-300 mb-2">
+                        <i class="fas fa-user mr-2 text-cyan-400"></i>Suspect Name
+                    </label>
+                    <input type="text" name="suspect_name" required placeholder="e.g, John Doe"
+                        value="{{ values.get('suspect_name', '') }}"
+                        class="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all duration-300">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-300 mb-2">
+                        <i class="fas fa-cake-candles mr-2 text-cyan-400"></i>Suspect Age
+                    </label>
+                    <input type="number" name="suspect_age" min="0" max="120" placeholder="e.g,25"
+                        value="{{ values.get('suspect_age', '') }}"
+                        class="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all duration-300">
+                </div>
+            </div>
+
+            <!-- Victim Row - Added victim name and contact fields -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-semibold text-slate-300 mb-2">
+                        <i class="fas fa-person mr-2 text-amber-400"></i>Victim Name
+                    </label>
+                    <input type="text" name="victim_name" placeholder="e.g, John Doe"
+                        value="{{ values.get('victim_name', '') }}"
+                        class="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all duration-300">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-300 mb-2">
+                        <i class="fas fa-phone mr-2 text-amber-400"></i>Victim Contact Number
+                    </label>
+                    <input type="tel" name="victim_contact" placeholder="10-digit number"
+                        value="{{ values.get('victim_contact', '') }}" pattern="\d{10}" title="Enter a 10-digit number"
+                        class="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all duration-300">
+                </div>
+            </div>
+
+            <!-- Location & Date -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-semibold text-slate-300 mb-2">
+                        <i class="fas fa-map-pin mr-2 text-cyan-400"></i>Incident Location
+                    </label>
+                    <input type="text" name="location" required value="{{ values.get('location', '') }}"
+                        class="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all duration-300">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-300 mb-2">
+                        <i class="fas fa-calendar mr-2 text-cyan-400"></i>Incident Date & Time
+                    </label>
+                    <div class="flex gap-2">
+                        <input type="date" id="dateInput" required
+                            class="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all duration-300">
+                        <div class="flex gap-1">
+                            <select id="hourInput"
+                                class="px-2 py-3 bg-slate-900/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-cyan-400">
+                                {% for i in range(1, 13) %}
+                                <option value="{{ i }}">{{ i }}</option>
+                                {% endfor %}
+                            </select>
+                            <select id="minuteInput"
+                                class="px-2 py-3 bg-slate-900/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-cyan-400">
+                                <option value="00">00</option>
+                                <option value="15">15</option>
+                                <option value="30">30</option>
+                                <option value="45">45</option>
+                            </select>
+                            <select id="ampmInput"
+                                class="px-2 py-3 bg-slate-900/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-cyan-400">
+                                <option value="AM">AM</option>
+                                <option value="PM">PM</option>
+                            </select>
+                        </div>
+                    </div>
+                    <input type="hidden" name="incident_date" id="fullDateInput">
+                    <p id="dateError" class="text-xs text-red-400 mt-1 hidden">Date cannot be older than 6 months.</p>
+                </div>
+            </div>
+
+            <!-- Evidence -->
+            <div>
+                <label class="block text-sm font-semibold text-slate-300 mb-2">
+                    <i class="fas fa-microscope mr-2 text-cyan-400"></i>Evidence
+                </label>
+                <textarea name="evidence" rows="3" placeholder="List all evidence collected at the scene"
+                    class="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all duration-300 resize-none">{{ values.get('evidence', '') }}</textarea>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex gap-4 pt-4 border-t border-slate-700">
+                <button type="submit"
+                    class="flex-1 py-3 px-4 bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-white font-semibold rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-cyan-500/50 flex items-center justify-center">
+                    <i class="fas fa-save mr-2"></i>File Report
+                </button>
+                <a href="{{ url_for('officer_dashboard') }}"
+                    class="flex-1 py-3 px-4 bg-slate-700 hover:bg-slate-600 text-white font-medium rounded-lg transition-all duration-300 text-center flex items-center justify-center">
+                    <i class="fas fa-times mr-2"></i>Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function updateSection() {
+        const select = document.getElementById('caseType');
+        const sectionInput = document.getElementById('sectionInput');
+        const selectedOption = select.options[select.selectedIndex];
+        const section = selectedOption.getAttribute('data-section');
+
+        if (section) {
+            sectionInput.value = section;
+            // Append section to title if empty
+            const titleInput = document.querySelector('input[name="title"]');
+            if (!titleInput.value) {
+                titleInput.value = select.value + " Incident";
+            }
+        } else if (select.value === 'Other') {
+            sectionInput.value = '';
+            sectionInput.focus();
+        }
+    }
+
+    // Date Validation & Formatting
+    const form = document.getElementById('recordForm');
+    const dateInput = document.getElementById('dateInput');
+    const hourInput = document.getElementById('hourInput');
+    const minuteInput = document.getElementById('minuteInput');
+    const ampmInput = document.getElementById('ampmInput');
+    const fullDateInput = document.getElementById('fullDateInput');
+    const dateError = document.getElementById('dateError');
+
+    function validateDate() {
+        if (!dateInput.value) return;
+
+        const date = new Date(dateInput.value);
+        const sixMonthsAgo = new Date();
+        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+        if (date < sixMonthsAgo) {
+            dateError.classList.remove('hidden');
+            dateInput.classList.add('border-red-500');
+            return false;
+        } else {
+            dateError.classList.add('hidden');
+            dateInput.classList.remove('border-red-500');
+            return true;
+        }
+    }
+
+    function updateFullDate() {
+        if (!dateInput.value) return;
+
+        let hour = parseInt(hourInput.value);
+        const minute = minuteInput.value;
+        const ampm = ampmInput.value;
+
+        if (ampm === 'PM' && hour < 12) hour += 12;
+        if (ampm === 'AM' && hour === 12) hour = 0;
+
+        const formattedHour = hour.toString().padStart(2, '0');
+        fullDateInput.value = `${dateInput.value}T${formattedHour}:${minute}`;
+    }
+
+    dateInput.addEventListener('change', () => {
+        validateDate();
+        updateFullDate();
+    });
+
+    [hourInput, minuteInput, ampmInput].forEach(el => {
+        el.addEventListener('change', updateFullDate);
+    });
+
+    form.addEventListener('submit', (e) => {
+        updateFullDate();
+        if (!validateDate()) {
+            e.preventDefault();
+            alert('Please correct the date error.');
+        }
+    });
+</script>
+{% endblock %}

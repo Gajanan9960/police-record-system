@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}Constable Dashboard - Police Record System{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex justify-between items-center">
+        <h2 class="text-3xl font-bold text-cyan-400">Constable Dashboard</h2>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="bg-slate-900 border border-slate-700 rounded-lg p-6">
+            <h3 class="text-slate-400 text-sm mb-2">Assigned Cases</h3>
+            <p class="text-3xl font-bold text-cyan-400">{{ total_assigned }}</p>
+        </div>
+    </div>
+
+    <!-- Assigned Cases -->
+    <div class="bg-slate-900 border border-slate-700 rounded-lg p-6">
+        <h3 class="text-xl font-bold text-white mb-4">My Assigned Cases</h3>
+        {% if assigned_cases %}
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead class="border-b border-slate-700">
+                    <tr>
+                        <th class="text-left py-2 px-4 text-slate-300">Case #</th>
+                        <th class="text-left py-2 px-4 text-slate-300">Title</th>
+                        <th class="text-left py-2 px-4 text-slate-300">Status</th>
+                        <th class="text-left py-2 px-4 text-slate-300">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for case in assigned_cases %}
+                    <tr class="border-b border-slate-800 hover:bg-slate-800">
+                        <td class="py-3 px-4 font-semibold text-cyan-300">{{ case.case_number }}</td>
+                        <td class="py-3 px-4">{{ case.title }}</td>
+                        <td class="py-3 px-4">{{ case.status|title }}</td>
+                        <td class="py-3 px-4">
+                            <a href="{{ url_for('case_detail', case_id=case.id) }}" class="text-cyan-400 hover:text-cyan-300">View Details</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-slate-400">No cases assigned currently.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

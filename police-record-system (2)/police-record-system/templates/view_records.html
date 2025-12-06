@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block title %}View Records - Police Record System{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <h2 class="text-3xl font-bold text-cyan-400">Police Records</h2>
+
+    <!-- Added search and filter section -->
+    <div class="bg-slate-900 border border-slate-700 rounded-lg p-6">
+        <form method="GET" class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-sm font-semibold text-slate-300 mb-2">
+                        <i class="fas fa-search mr-2 text-cyan-400"></i>Search
+                    </label>
+                    <input type="text" name="search" value="{{ search_query }}"
+                        placeholder="Case number, title, or suspect name"
+                        class="w-full px-4 py-2 bg-slate-800 border border-slate-600 rounded text-white focus:outline-none focus:border-cyan-400 text-sm">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-300 mb-2">
+                        <i class="fas fa-filter mr-2 text-cyan-400"></i>Status
+                    </label>
+                    <select name="status"
+                        class="w-full px-4 py-2 bg-slate-800 border border-slate-600 rounded text-white focus:outline-none focus:border-cyan-400 text-sm">
+                        <option value="">All Status</option>
+                        <option value="open" {% if status_filter=='open' %}selected{% endif %}>Open</option>
+                        <option value="in_progress" {% if status_filter=='in_progress' %}selected{% endif %}>In Progress
+                        </option>
+                        <option value="closed" {% if status_filter=='closed' %}selected{% endif %}>Closed</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-300 mb-2">
+                        <i class="fas fa-exclamation-triangle mr-2 text-red-400"></i>Severity
+                    </label>
+                    <select name="severity"
+                        class="w-full px-4 py-2 bg-slate-800 border border-slate-600 rounded text-white focus:outline-none focus:border-cyan-400 text-sm">
+                        <option value="">All Severity</option>
+                        <option value="low" {% if severity_filter=='low' %}selected{% endif %}>Low</option>
+                        <option value="medium" {% if severity_filter=='medium' %}selected{% endif %}>Medium</option>
+                        <option value="high" {% if severity_filter=='high' %}selected{% endif %}>High</option>
+                    </select>
+                </div>
+                <div class="flex items-end gap-2">
+                    <button type="submit"
+                        class="flex-1 px-4 py-2 bg-cyan-600 hover:bg-cyan-700 rounded text-white font-medium text-sm transition-all">
+                        <i class="fas fa-search mr-2"></i>Search
+                    </button>
+                    <a href="{{ url_for('view_records') }}"
+                        class="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded text-white font-medium text-sm transition-all text-center">
+                        <i class="fas fa-redo mr-2"></i>Reset
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    {% if fuzzy_used and search_query %}
+    <div class="bg-blue-900/40 border border-blue-700 rounded-lg p-4 text-sm text-blue-100">
+        Showing fuzzy matches for "{{ search_query }}". These records have similar names even if spelling differs.
+    </div>
+    {% endif %}
+
+    {% if records %}
+    <div class="space-y-4">
+        {% for case in records %}
+        <div class="bg-slate-900 border border-slate-700 rounded-lg p-6 hover:border-slate-600">
+            <div class="flex justify-between items-start mb-3">
+                <div>
+                    <h3 class="text-xl font-semibold text-cyan-400">{{ case.title }}</h3>
+                    <p class="text-sm text-slate-400">Case: {{ case.case_number }}</p>
+                </div>
+                <div class="flex gap-2">
+                    <span class="px-3 py-1 rounded text-sm font-medium
+                        {% if case.status == 'open' %}bg-orange-900 text-orange-200
+                        {% elif case.status == 'in_progress' %}bg-blue-900 text-blue-200
+                        {% elif case.status == 'closed' %}bg-green-900 text-green-200
+                        {% else %}bg-slate-700 text-slate-300{% endif %}">
+                        {{ case.status.replace('_', ' ')|title }}
+                    </span>
+                    <span class="px-3 py-1 rounded text-sm font-medium
+                        {% if case.priority == 'high' %}bg-red-900 text-red-200
+                        {% elif case.priority == 'medium' %}bg-yellow-900 text-yellow-200
+                        {% else %}bg-green-900 text-green-200{% endif %}">
+                        {{ case.priority|capitalize }}
+                    </span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4 text-sm">
+                <div>
+                    <p class="text-slate-400">Lead Officer</p>
+                    <p class="text-white font-medium">{{ case.lead_officer.full_name if case.lead_officer else
+                        'Unassigned' }}</p>
+                </div>
+                <div>
+                    <p class="text-slate-400">Opened</p>
+                    <p class="text-white font-medium">{{ case.opened_at.strftime('%Y-%m-%d') }}</p>
+                </div>
+                <!-- Location and Suspect are not direct fields on Case, using Description/Incidents if needed, or omitting -->
+            </div>
+
+            <p class="text-slate-300 text-sm mb-4">{{ case.description }}</p>
+
+            <div class="flex gap-2">
+                <a href="{{ url_for('case_detail', case_id=case.id) }}"
+                    class="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded text-white text-sm transition-all">
+                    <i class="fas fa-eye mr-2"></i>View Details
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="bg-slate-900 border border-slate-700 rounded-lg p-8 text-center">
+        <p class="text-slate-400">No records found matching your criteria</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

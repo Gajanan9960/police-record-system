@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}Login - Police Record System{% endblock %}
+
+{% block content %}
+
+<head>
+    <script src="./login.js"></script>
+</head>
+<div class="flex items-center justify-center min-h-[calc(100vh-100px)]">
+    <div class="w-full max-w-md">
+        <div class="bg-slate-900 border border-slate-700 rounded-lg p-8">
+            <h2 class="text-3xl font-bold text-center text-cyan-400 mb-8">Police Record System</h2>
+
+            <form method="POST" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-2">Username</label>
+                    <input type="text" name="username" required
+                        class="w-full px-4 py-2 bg-slate-800 border border-slate-600 rounded text-white focus:outline-none focus:border-cyan-400">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-2">Password</label>
+                    <input type="password" name="password" required
+                        class="w-full px-4 py-2 bg-slate-800 border border-slate-600 rounded text-white focus:outline-none focus:border-cyan-400">
+                    <div class="flex justify-end mt-1">
+                        <a href="{{ url_for('forgot_password') }}"
+                            class="text-xs text-cyan-500 hover:text-cyan-400">Forgot Password?</a>
+                    </div>
+                </div>
+
+                <button type="submit"
+                    class="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-medium py-2 rounded mt-6">
+                    Login
+                </button>
+            </form>
+
+            <div class="mt-8 pt-6 border-t border-slate-700">
+                <h3 class="text-sm font-semibold text-slate-400 mb-4">Test Credentials:</h3>
+                <div class="space-y-2 text-xs text-slate-400">
+                    <p><strong>Admin:</strong> admin / admin123</p>
+                    <p><strong>Officer:</strong> officer1 / pass123</p>
+                    <p><strong>Inspector:</strong> inspector1 / pass123</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

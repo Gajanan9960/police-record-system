@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}User Management - Police Record System{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <h2 class="text-3xl font-bold text-cyan-400">User Management</h2>
+
+    <!-- Add User Form -->
+    <div class="bg-slate-900 border border-slate-700 rounded-lg p-6">
+        <h3 class="text-xl font-bold text-white mb-4">Add New User</h3>
+        <form method="POST" action="{{ url_for('add_user') }}" class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-2">Full Name</label>
+                    <input type="text" name="full_name" required 
+                           class="w-full px-4 py-2 bg-slate-800 border border-slate-600 rounded text-white focus:outline-none focus:border-cyan-400">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-2">Badge Number</label>
+                    <input type="text" name="badge_number" required 
+                           class="w-full px-4 py-2 bg-slate-800 border border-slate-600 rounded text-white focus:outline-none focus:border-cyan-400">
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-2">Username</label>
+                    <input type="text" name="username" required 
+                           class="w-full px-4 py-2 bg-slate-800 border border-slate-600 rounded text-white focus:outline-none focus:border-cyan-400">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-2">Password</label>
+                    <input type="password" name="password" required 
+                           class="w-full px-4 py-2 bg-slate-800 border border-slate-600 rounded text-white focus:outline-none focus:border-cyan-400">
+                </div>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-slate-300 mb-2">Role</label>
+                <select name="role" required class="w-full px-4 py-2 bg-slate-800 border border-slate-600 rounded text-white focus:outline-none focus:border-cyan-400">
+                    <option value="">Select a role</option>
+                    <option value="admin">Admin</option>
+                    <option value="officer">Police Officer</option>
+                    <option value="inspector">Inspector</option>
+                </select>
+            </div>
+            <button type="submit" class="px-6 py-2 bg-cyan-600 hover:bg-cyan-700 rounded text-white font-medium">
+                Add User
+            </button>
+        </form>
+    </div>
+
+    <!-- Users Table -->
+    <div class="bg-slate-900 border border-slate-700 rounded-lg p-6">
+        <h3 class="text-xl font-bold text-white mb-4">System Users</h3>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead class="border-b border-slate-700">
+                    <tr>
+                        <th class="text-left py-3 px-4 text-slate-300">Name</th>
+                        <th class="text-left py-3 px-4 text-slate-300">Username</th>
+                        <th class="text-left py-3 px-4 text-slate-300">Role</th>
+                        <th class="text-left py-3 px-4 text-slate-300">Badge</th>
+                        <th class="text-left py-3 px-4 text-slate-300">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr class="border-b border-slate-700 hover:bg-slate-800">
+                        <td class="py-3 px-4">{{ user.full_name }}</td>
+                        <td class="py-3 px-4 text-cyan-400">{{ user.username }}</td>
+                        <td class="py-3 px-4">
+                            <span class="px-2 py-1 rounded text-xs font-medium 
+                                {% if user.role == 'admin' %}bg-red-900 text-red-200
+                                {% elif user.role == 'officer' %}bg-blue-900 text-blue-200
+                                {% else %}bg-purple-900 text-purple-200{% endif %}">
+                                {{ user.role }}
+                            </span>
+                        </td>
+                        <td class="py-3 px-4">{{ user.badge_number }}</td>
+                        <td class="py-3 px-4">
+                            {% if user.id != current_user.id %}
+                            <form method="POST" action="{{ url_for('delete_user', user_id=user.id) }}" class="inline">
+                                <button type="submit" onclick="return confirm('Delete this user?')" class="px-3 py-1 bg-red-600 hover:bg-red-700 rounded text-white text-xs">
+                                    Delete
+                                </button>
+                            </form>
+                            {% else %}
+                            <span class="text-slate-400 text-xs">Current User</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
