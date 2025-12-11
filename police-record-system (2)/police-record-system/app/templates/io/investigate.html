@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mx-auto px-4">
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h2 class="text-3xl font-bold text-cyan-400">Investigation: {{ case.case_number }}</h2>
+            <p class="text-gray-400">{{ case.title }}</p>
+        </div>
+        <a href="{{ url_for('io.dashboard') }}" class="text-gray-400 hover:text-white">Back to Dashboard</a>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Left Column: Updates & Timeline -->
+        <div class="lg:col-span-2 space-y-6">
+            <!-- Add Update -->
+            <div class="bg-slate-800 rounded-lg shadow border border-slate-700 p-6">
+                <h3 class="text-xl font-bold text-white mb-4">Daily Diary / Updates</h3>
+                <form method="POST" action="">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                    <textarea name="update_text"
+                        class="w-full bg-slate-700 border border-slate-600 rounded text-white p-3 mb-2 focus:outline-none focus:border-cyan-400"
+                        rows="3" placeholder="Log investigation progress..."></textarea>
+                    <div class="text-right">
+                        <button type="submit"
+                            class="bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-1 px-4 rounded">Add
+                            Update</button>
+                    </div>
+                </form>
+
+                <div class="mt-6 space-y-4">
+                    {% for update in case.updates|sort(attribute='created_at', reverse=True) %}
+                    <div class="border-l-2 border-cyan-600 pl-4">
+                        <p class="text-gray-300 text-sm">{{ update.description }}</p>
+                        <p class="text-gray-500 text-xs mt-1">{{ update.created_at.strftime('%Y-%m-%d %H:%M') }} by {{
+                            update.officer.full_name }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Statements -->
+            <div class="bg-slate-800 rounded-lg shadow border border-slate-700 p-6">
+                <h3 class="text-xl font-bold text-white mb-4">Witness Statements</h3>
+
+                <!-- Add Statement Modal Trigger (Simplified as inline form for now) -->
+                <div class="mb-6 bg-slate-900 p-4 rounded">
+                    <h4 class="text-sm font-bold text-gray-400 mb-2">Record New Statement</h4>
+                    <form action="{{ url_for('io.add_statement', case_id=case.id) }}" method="POST">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                        <div class="grid grid-cols-2 gap-4 mb-2">
+                            <input type="text" name="person_name" placeholder="Person Name"
+                                class="bg-slate-700 border border-slate-600 rounded text-white px-3 py-1" required>
+                            <select name="type"
+                                class="bg-slate-700 border border-slate-600 rounded text-white px-3 py-1">
+                                <option value="Witness">Witness</option>
+                                <option value="Victim">Victim</option>
+                                <option value="Accused">Accused</option>
+                            </select>
+                        </div>
+                        <textarea name="content"
+                            class="w-full bg-slate-700 border border-slate-600 rounded text-white p-2 mb-2" rows="2"
+                            placeholder="Statement content..." required></textarea>
+                        <button type="submit"
+                            class="bg-green-600 hover:bg-green-700 text-white text-sm font-bold py-1 px-3 rounded">Record
+                            Statement</button>
+                    </form>
+                </div>
+
+                <div class="space-y-4">
+                    {% for stmt in case.statements %}
+                    <div class="bg-slate-700 p-3 rounded">
+                        <div class="flex justify-between mb-1">
+                            <span class="font-bold text-white">{{ stmt.person_name }} ({{ stmt.type }})</span>
+                            <span class="text-xs text-gray-400">{{ stmt.created_at.strftime('%Y-%m-%d') }}</span>
+                        </div>
+                        <p class="text-gray-300 text-sm italic">"{{ stmt.content }}"</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Evidence -->
+        <div class="space-y-6">
+            <div class="bg-slate-800 rounded-lg shadow border border-slate-700 p-6">
+                <h3 class="text-xl font-bold text-white mb-4">Evidence</h3>
+
+                <div class="mb-6 bg-slate-900 p-4 rounded">
+                    <h4 class="text-sm font-bold text-gray-400 mb-2">Add Evidence</h4>
+                    <form action="{{ url_for('io.add_evidence', case_id=case.id) }}" method="POST">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                        <input type="text" name="description" placeholder="Description"
+                            class="w-full bg-slate-700 border border-slate-600 rounded text-white px-3 py-1 mb-2"
+                            required>
+                        <div class="grid grid-cols-2 gap-2 mb-2">
+                            <select name="type"
+                                class="bg-slate-700 border border-slate-600 rounded text-white px-2 py-1">
+                                <option value="Physical">Physical</option>
+                                <option value="Digital">Digital</option>
+                                <option value="Document">Document</option>
+                            </select>
+                            <input type="text" name="location" placeholder="Location"
+                                class="bg-slate-700 border border-slate-600 rounded text-white px-2 py-1">
+                        </div>
+                        <button type="submit"
+                            class="w-full bg-yellow-600 hover:bg-yellow-700 text-white text-sm font-bold py-1 px-3 rounded">Log
+                            Evidence</button>
+                    </form>
+                </div>
+
+                <ul class="space-y-3">
+                    {% for item in case.evidence %}
+                    <li class="bg-slate-700 p-3 rounded border-l-4 border-yellow-500">
+                        <p class="font-bold text-white text-sm">{{ item.description }}</p>
+                        <div class="flex justify-between text-xs text-gray-400 mt-1">
+                            <span>{{ item.type }}</span>
+                            <span>{{ item.status }}</span>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

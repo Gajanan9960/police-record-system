@@ -1,0 +1,344 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mx-auto px-4 max-w-4xl">
+    <h2 class="text-3xl font-bold text-cyan-400 mb-6">New Case Incident Report</h2>
+
+    <div class="bg-slate-800 rounded-lg shadow border border-slate-700 p-6">
+        <form method="POST" enctype="multipart/form-data">
+            {{ form.hidden_tag() }}
+
+            <!-- Section 1: Case Identification -->
+            <div class="mb-8 border-b border-slate-700 pb-4">
+                <h3 class="text-xl font-bold text-white mb-4"><i class="fas fa-id-card mr-2"></i>Case Identification
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-gray-400 text-sm font-bold mb-2">Case Number</label>
+                        {{ form.case_number(class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700
+                        leading-tight focus:outline-none focus:shadow-outline bg-slate-700 border-slate-600 text-white",
+                        placeholder="Auto-generated if empty") }}
+                    </div>
+                    <div>
+                        <label class="block text-gray-400 text-sm font-bold mb-2">Linked FIR (Optional)</label>
+                        {{ form.linked_fir_id(class="shadow appearance-none border rounded w-full py-2 px-3
+                        text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-slate-700
+                        border-slate-600 text-white") }}
+                    </div>
+                    <div class="col-span-2">
+                        <label class="block text-gray-400 text-sm font-bold mb-2">Case Title <span
+                                class="text-red-500">*</span></label>
+                        {{ form.title(class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700
+                        leading-tight focus:outline-none focus:shadow-outline bg-slate-700 border-slate-600 text-white")
+                        }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 2: Incident Details -->
+            <div class="mb-8 border-b border-slate-700 pb-4">
+                <h3 class="text-xl font-bold text-white mb-4"><i class="fas fa-exclamation-triangle mr-2"></i>Incident
+                    Details</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-gray-400 text-sm font-bold mb-2">Offense Type <span
+                                class="text-red-500">*</span></label>
+                        {{ form.offense_type(class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700
+                        leading-tight focus:outline-none focus:shadow-outline bg-slate-700 border-slate-600 text-white")
+                        }}
+                    </div>
+                    <div>
+                        <label class="block text-gray-400 text-sm font-bold mb-2">Date & Time <span
+                                class="text-red-500">*</span></label>
+                        {{ form.incident_date(class="shadow appearance-none border rounded w-full py-2 px-3
+                        text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-slate-700
+                        border-slate-600 text-white", type="datetime-local") }}
+                    </div>
+                    <div class="col-span-2">
+                        <label class="block text-gray-400 text-sm font-bold mb-2">Location (Address) <span
+                                class="text-red-500">*</span></label>
+                        {{ form.location(class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700
+                        leading-tight focus:outline-none focus:shadow-outline bg-slate-700 border-slate-600 text-white")
+                        }}
+                    </div>
+                    <div class="col-span-2">
+                        <label class="block text-gray-400 text-sm font-bold mb-2">Short Description <span
+                                class="text-red-500">*</span></label>
+                        {{ form.short_description(class="shadow appearance-none border rounded w-full py-2 px-3
+                        text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-slate-700
+                        border-slate-600 text-white") }}
+                    </div>
+                    <div class="col-span-2 md:col-span-1">
+                        <label class="block text-gray-400 text-sm font-bold mb-2">Detailed Description <span
+                                class="text-red-500">*</span></label>
+                        {{ form.description(class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700
+                        leading-tight focus:outline-none focus:shadow-outline bg-slate-700 border-slate-600 text-white",
+                        rows="5") }}
+                    </div>
+                    <div class="col-span-2 md:col-span-1">
+                        <label class="block text-gray-400 text-sm font-bold mb-2">Confidentiality & Admin</label>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-gray-400 text-xs font-bold mb-1">Confidentiality Level</label>
+                                <div class="relative">
+                                    {{ form.confidentiality_level(class="block appearance-none w-full bg-slate-700
+                                    border border-slate-600 text-white py-2 px-3 pr-8 rounded leading-tight
+                                    focus:outline-none focus:shadow-outline") }}
+                                    <div
+                                        class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-white">
+                                        <i class="fas fa-chevron-down text-xs"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-gray-400 text-xs font-bold mb-1">Tags (comma separated)</label>
+                                {{ form.tags(class="shadow appearance-none border rounded w-full py-2 px-3 text-white
+                                bg-slate-700 border-slate-600", placeholder="e.g. gang-violence, cyber-fraud") }}
+                            </div>
+                            <div>
+                                <label class="block text-gray-400 text-xs font-bold mb-1">Related Case IDs</label>
+                                {{ form.related_case_ids(class="shadow appearance-none border rounded w-full py-2 px-3
+                                text-white bg-slate-700 border-slate-600", placeholder="e.g. 102, 105") }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 3: Participants -->
+            <div class="mb-8 border-b border-slate-700 pb-4">
+                <h3 class="text-xl font-bold text-white mb-4"><i class="fas fa-users mr-2"></i>Participants (Victims,
+                    Suspects, etc.)</h3>
+                <div id="participants-container">
+                    <!-- Dynamic Rows appended here -->
+                </div>
+                <button type="button" onclick="addParticipant()"
+                    class="bg-gray-700 hover:bg-gray-600 text-white text-sm font-bold py-2 px-4 rounded border border-gray-600 mt-2">
+                    <i class="fas fa-plus mr-1"></i> Add Participant
+                </button>
+            </div>
+
+            <!-- Section 4: Classification & Assignment -->
+            <div class="mb-8 border-b border-slate-700 pb-4">
+                <h3 class="text-xl font-bold text-white mb-4"><i class="fas fa-tasks mr-2"></i>Classification &
+                    Assignment</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-gray-400 text-sm font-bold mb-2">Priority</label>
+                        {{ form.priority(class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700
+                        leading-tight focus:outline-none focus:shadow-outline bg-slate-700 border-slate-600 text-white")
+                        }}
+                    </div>
+                    <div>
+                        <label class="block text-gray-400 text-sm font-bold mb-2">Status</label>
+                        {{ form.status(class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700
+                        leading-tight focus:outline-none focus:shadow-outline bg-slate-700 border-slate-600 text-white")
+                        }}
+                    </div>
+                    <div>
+                        <label class="block text-gray-400 text-sm font-bold mb-2">Lead Inspector</label>
+                        {{ form.assigned_officer_id(class="shadow appearance-none border rounded w-full py-2 px-3
+                        text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-slate-700
+                        border-slate-600 text-white") }}
+                    </div>
+                    <div>
+                        <label class="block text-gray-400 text-sm font-bold mb-2">Assign Officers (Hold Cmd/Ctrl to
+                            Select Multiple)</label>
+                        {{ form.officer_ids(class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700
+                        leading-tight focus:outline-none focus:shadow-outline bg-slate-700 border-slate-600 text-white",
+                        multiple=True) }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 5: Evidence & Legal -->
+            <div class="mb-8 border-b border-slate-700 pb-4">
+                <h3 class="text-xl font-bold text-white mb-4"><i class="fas fa-balance-scale mr-2"></i>Legal & Evidence
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-gray-400 text-sm font-bold mb-2">Offense Category</label>
+                        {{ form.is_cognizable(class="shadow appearance-none border rounded w-full py-2 px-3
+                        text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-slate-700
+                        border-slate-600 text-white") }}
+                    </div>
+                    <div>
+                        <label class="block text-gray-400 text-sm font-bold mb-2">IPC Sections</label>
+                        {{ form.ipc_sections(class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700
+                        leading-tight focus:outline-none focus:shadow-outline bg-slate-700 border-slate-600 text-white",
+                        placeholder="e.g. 302, 307") }}
+                    </div>
+
+                    <div class="col-span-2 space-y-2 mt-4">
+                        <div class="flex items-center">
+                            {{ form.init_medical_exam(class="mr-2 leading-tight") }}
+                            <label class="text-gray-300 text-sm">Initiate Medical Examination</label>
+                        </div>
+                        <div class="flex items-center">
+                            {{ form.init_prelim_enquiry(class="mr-2 leading-tight") }}
+                            <label class="text-gray-300 text-sm">Initiate Preliminary Enquiry</label>
+                        </div>
+                        <div class="flex items-center">
+                            {{ form.init_scene_visit(class="mr-2 leading-tight") }}
+                            <label class="text-gray-300 text-sm">Initiate Scene Visit</label>
+                        </div>
+                    </div>
+
+                    <div class="col-span-2 mt-4">
+                        <label class="block text-gray-400 text-sm font-bold mb-2">Upload Evidence (Photos/Docs)</label>
+                        {{ form.evidence_files(class="shadow appearance-none border rounded w-full py-2 px-3
+                        text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-slate-700
+                        border-slate-600 text-white") }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between">
+                {{ form.submit(class="bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-2 px-6 rounded
+                focus:outline-none focus:shadow-outline") }}
+                <a href="{{ url_for('cases.list_cases') }}"
+                    class="inline-block align-baseline font-bold text-sm text-cyan-400 hover:text-cyan-500">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // 1. Auto-generate Case ID if empty
+        const caseNumField = document.querySelector('[name="case_number"]');
+        if (caseNumField && !caseNumField.value) {
+            const now = new Date();
+            const timestamp = now.toISOString().replace(/[-:T.]/g, '').slice(0, 14); // YYYYMMDDHHMMSS
+            const random = Math.floor(Math.random() * 9000) + 1000;
+            caseNumField.value = `CASE-${timestamp}-${random}`;
+        }
+
+        // 2. Real-time Date Validation
+        const dateField = document.querySelector('[name="incident_date"]');
+        if (dateField) {
+            // Create error message element
+            const errorMsg = document.createElement('p');
+            errorMsg.className = 'text-red-500 text-xs italic mt-1 hidden';
+            dateField.parentNode.appendChild(errorMsg);
+
+            dateField.addEventListener('input', function () {
+                const inputDate = new Date(this.value);
+                const now = new Date();
+                // Add 1 hour buffer for "future" check as per requirements
+                const bufferTime = new Date(now.getTime() + 60 * 60 * 1000);
+
+                if (inputDate > bufferTime) {
+                    errorMsg.textContent = "Incident date cannot be in the future.";
+                    errorMsg.classList.remove('hidden');
+                    this.classList.add('border-red-500');
+                } else {
+                    errorMsg.classList.add('hidden');
+                    this.classList.remove('border-red-500');
+                }
+            });
+        }
+
+        // 3. Auto-populate IPC Sections based on Offense Type
+        const offenseSelect = document.querySelector('[name="offense_type"]');
+        const ipcField = document.querySelector('[name="ipc_sections"]');
+        const cognizableField = document.querySelector('[name="is_cognizable"]');
+
+        const ipcMapping = {
+            'Theft': '379',
+            'Burglary': '445, 451',
+            'Assault': '351, 352',
+            'Cybercrime': '66 IT Act',
+            'Fraud': '420',
+            'Homicide': '302',
+            'Drug Offense': '20 NDPS Act',
+            'Other': ''
+        };
+
+        const cognizableMapping = {
+            'Theft': 'True',
+            'Burglary': 'True',
+            'Assault': 'False', // Simple assault is non-cognizable usually, but valid for defaults
+            'Cybercrime': 'True',
+            'Fraud': 'True',
+            'Homicide': 'True',
+            'Drug Offense': 'True',
+            'Other': 'True'
+        };
+
+        if (offenseSelect && ipcField) {
+            offenseSelect.addEventListener('change', function () {
+                const selected = this.value;
+                if (ipcMapping[selected]) {
+                    ipcField.value = ipcMapping[selected];
+
+                    // Visual cue
+                    ipcField.classList.add('bg-slate-600');
+                    setTimeout(() => ipcField.classList.remove('bg-slate-600'), 500);
+                } else {
+                    ipcField.value = '';
+                }
+
+                if (cognizableField && cognizableMapping[selected]) {
+                    cognizableField.value = cognizableMapping[selected];
+                }
+            });
+        }
+
+        // 4. Initial Participant Row
+        if (document.getElementById('participants-container').children.length === 0) {
+            addParticipant();
+        }
+    });
+
+    function addParticipant() {
+        const container = document.getElementById('participants-container');
+        const index = container.children.length;
+        const html = `
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4 bg-slate-700 p-4 rounded border border-slate-600 relative participant-row">
+        <button type="button" onclick="this.parentElement.remove()" class="absolute top-2 right-2 text-red-400 hover:text-red-300"><i class="fas fa-times"></i></button>
+        <div>
+            <label class="block text-gray-400 text-xs font-bold mb-1">Type</label>
+            <div class="relative">
+                <select name="participant_type[]" class="block appearance-none w-full bg-slate-800 text-white text-sm rounded border border-slate-500 p-2 pr-8 leading-tight focus:outline-none focus:shadow-outline">
+                    <option value="Victim">Victim</option>
+                    <option value="Suspect">Suspect</option>
+                    <option value="Witness">Witness</option>
+                    <option value="Complainant">Complainant</option>
+                </select>
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
+                    <i class="fas fa-chevron-down text-xs"></i>
+                </div>
+            </div>
+        </div>
+        <div>
+            <label class="block text-gray-400 text-xs font-bold mb-1">Name</label>
+            <input type="text" name="participant_name[]" class="bg-slate-800 text-white text-sm rounded border border-slate-500 w-full p-2" required>
+        </div>
+        <div>
+            <label class="block text-gray-400 text-xs font-bold mb-1">Contact</label>
+            <input type="text" name="participant_contact[]" class="bg-slate-800 text-white text-sm rounded border border-slate-500 w-full p-2">
+        </div>
+        <div>
+            <label class="block text-gray-400 text-xs font-bold mb-1">National ID</label>
+            <input type="text" name="participant_national_id[]" class="bg-slate-800 text-white text-sm rounded border border-slate-500 w-full p-2">
+        </div>
+        <div>
+            <label class="block text-gray-400 text-xs font-bold mb-1">DOB</label>
+            <input type="date" name="participant_dob[]" class="bg-slate-800 text-white text-sm rounded border border-slate-500 w-full p-2">
+        </div>
+        <div class="col-span-3">
+             <label class="block text-gray-400 text-xs font-bold mb-1">Address</label>
+             <input type="text" name="participant_address[]" class="bg-slate-800 text-white text-sm rounded border border-slate-500 w-full p-2">
+        </div>
+        <div class="col-span-1 md:col-span-4">
+             <label class="block text-gray-400 text-xs font-bold mb-1">Details/Statement</label>
+             <textarea name="participant_details[]" class="bg-slate-800 text-white text-sm rounded border border-slate-500 w-full p-2" rows="2"></textarea>
+        </div>
+    </div>
+    `;
+        container.insertAdjacentHTML('beforeend', html);
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,380 @@
+Case creation — fields, purpose and full validations
+
+Below is a single, self-contained description you can paste into docs or use to implement the “Add Case” form. First I explain the fields and their role in one paragraph, then I list complete validations (client + server rules, exact formats, error text and any DB/relationship checks). Server-side rules are authoritative — client-side should mirror them for faster feedback.
+
+⸻
+
+Fields & purpose (paragraph)
+
+When adding a case the form collects a short, unique case number and a human-friendly title followed by a detailed description of the incident. The incident’s date and time and a precise location (address plus optional latitude/longitude) record where and when the crime took place. The case is classified with a case type / category (e.g., Theft, Assault, Traffic, Cybercrime), a priority (Low / Medium / High / Critical) and an initial status (New / Under Investigation / Closed / Filed / Court). The case must be scoped to the station via police_station_id and optionally linked to an existing FIR or related_case_id. Assignment fields include assigned_inspector_id and assigned_officer_id (officers report to inspectors). The form captures key persons: arrays for victims and suspects (each with name, contact, DOB, address, national ID), and witnesses (name, contact, statement). Evidence is added as one or more attachments (photos, video, audio, documents) with metadata (collected_by, collected_at, evidence_type). Administrative fields include reported_by (user who created the case), confidentiality_level (Public / Restricted / Confidential), tags, and optional geodata for mapping. Every write must generate an audit record (user id, role, action, timestamp, ip) and the system must enforce station-scoped RBAC so only users within the configured station and with the correct role may create or view the case.
+
+⸻
+
+Complete validations (field-by-field)
+
+Implementation notes: Always perform validations server-side (Flask/SQLAlchemy/WTForms or equivalent). Mirror the same checks client-side for a better UX. All error responses should return clear messages and HTTP 4xx status codes (400 for validation, 403 for permission, 404 for not found). Log validation failures for auditing / security.
+
+⸻
+
+1. case_number (string)
+	•	Purpose: unique identifier (human readable; can be auto-generated if blank).
+	•	Required: Yes (server may auto-generate if no input; if user-supplied must validate uniqueness).
+	•	Type: string
+	•	Allowed format: recommended STN-YYYY-MM-XXXX or regex: ^[A-Z0-9\-]{5,40}$.
+	•	Uniqueness: must be unique within the station; DB unique index on (police_station_id, case_number).
+	•	Length: 5–40 characters.
+	•	Validation:
+	•	Not empty (unless system auto-generates).
+	•	Matches regex if provided.
+	•	DB uniqueness check (atomic/transactional to avoid race conditions).
+	•	Error messages:
+	•	“Case number is required.” / “Invalid case number format.” / “Case number already exists for this station.”
+
+⸻
+
+2. title (string)
+	•	Purpose: short summary
+	•	Required: Yes
+	•	Type: string
+	•	Length: 5–150 characters
+	•	Validation:
+	•	Trim whitespace.
+	•	No control characters; escape HTML to prevent XSS.
+	•	Error:
+	•	“Provide a short case title (5–150 characters).”
+
+⸻
+
+3. description (text)
+	•	Purpose: full incident narrative
+	•	Required: Yes
+	•	Type: text (rich-text allowed but sanitize server-side)
+	•	Length: 20–5000 characters
+	•	Validation:
+	•	Must be plain text or sanitized HTML (strip scripts, iframes).
+	•	Minimum informational length enforced (≥ 20).
+	•	Error:
+	•	“Description is required and must be at least 20 characters.”
+
+⸻
+
+4. incident_date_time (datetime)
+	•	Purpose: when the incident occurred
+	•	Required: Yes (if unknown, allow incident_date_unknown boolean)
+	•	Type: ISO 8601 string (e.g., 2025-12-10T14:30:00Z) or timezone-aware datetime object
+	•	Validation:
+	•	Must parse as a valid datetime.
+	•	Not future-dated more than a configurable allowance (e.g., > now + 1 hour should be rejected) — allow small clock skew if required.
+	•	If incident_date_unknown true, incident_date_time may be null and incident_date_accuracy (e.g., “approximate”, “day-only”) required.
+	•	Error:
+	•	“Invalid incident date/time.” / “Incident date cannot be in the far future.”
+
+⸻
+
+5. location (object)
+	•	Fields: address (string), latitude (float, optional), longitude (float, optional), location_source (map/manual)
+	•	Required: address Yes (unless geo co-ordinates provided and address optional per policy)
+	•	Address length: 5–500 chars
+	•	Latitude/Longitude validation:
+	•	If provided: lat between -90 and 90, lon between -180 and 180.
+	•	If geocoding used, ensure sanitized returned coordinates.
+	•	Validation:
+	•	At least one of address or lat/lng must be present.
+	•	If lat/lng present, check numeric and within bounds.
+	•	Error:
+	•	“Provide an incident address or pin on the map.” / “Invalid coordinates.”
+
+⸻
+
+6. case_type / category (enum)
+	•	Purpose: classify crime
+	•	Required: Yes
+	•	Allowed values: enforce an enumerated list (e.g., ["Theft", "Assault", "Burglary", "Traffic", "Cyber", "Fraud", "Other"])
+	•	Validation:
+	•	Must be one of the allowed values.
+	•	Error:
+	•	“Select a valid case category.”
+
+⸻
+
+7. priority (enum)
+	•	Required: Yes (default Medium)
+	•	Allowed: ["Low","Medium","High","Critical"]
+	•	Validation:
+	•	Must be in allowed list.
+	•	Error:
+	•	“Invalid priority.”
+
+⸻
+
+8. status (enum)
+	•	Purpose: lifecycle track
+	•	Required: Yes (default New)
+	•	Allowed values: ["New","Under Investigation","FIR Filed","Court","Closed","Rejected"]
+	•	Validation:
+	•	Only certain roles can set certain statuses (e.g., only Inspector/Admin can set Closed or Court).
+	•	When status changes, ensure required preconditions (e.g., cannot set Court unless evidence_chain_complete true).
+	•	Error:
+	•	“You are not authorized to set this status.” / “Cannot change status: missing required evidence.”
+
+⸻
+
+9. police_station_id (integer/UUID)
+	•	Purpose: station scoping
+	•	Required: Yes (for single-station deployment should equal configured station id)
+	•	Validation:
+	•	Must match configured station id for this deployment (enforce in middleware).
+	•	If record missing or mismatched, deny with 403.
+	•	Error:
+	•	“Invalid station. Access denied.”
+
+⸻
+
+10. assigned_inspector_id (FK to User)
+	•	Purpose: lead investigator
+	•	Required: Conditional (recommended: can be blank at creation but must be assigned within X hours)
+	•	Validation:
+	•	Must refer to an existing user with role inspector and same station_id.
+	•	If provided, check user is active.
+	•	Error:
+	•	“Assigned inspector must be an active inspector in this station.”
+
+⸻
+
+11. assigned_officer_id (FK to User)
+	•	Purpose: field officer
+	•	Required: Conditional
+	•	Validation:
+	•	Must exist and have role officer and be assigned under the specified inspector (if a policy enforces that relationship).
+	•	Must be active.
+	•	Error:
+	•	“Assigned officer must be an active officer reporting to the selected inspector.”
+
+⸻
+
+12. victims (array of objects)
+	•	Each victim object: { name, contact_phone, contact_email (optional), address (optional), national_id(optional), dob (optional), consent_for_contact (bool) }
+	•	Validation per victim:
+	•	name: required, 2–120 chars, no scripts, sanitized.
+	•	contact_phone: if provided, validate E.164 or local phone regex; max 15 digits.
+	•	contact_email: if provided, valid email format.
+	•	dob: optional, valid date; if present should be reasonable (not future; age < 150).
+	•	consent_for_contact: boolean; if false, mark victim as restricted.
+	•	Error:
+	•	“Victim name required.” / “Invalid phone number for victim.”
+
+⸻
+
+13. suspects (array of objects)
+	•	Each suspect: { name, aliases[], dob, address, national_id, status (Wanted/Arrested/Released), notes }
+	•	Validation per suspect:
+	•	name: 2–120 chars (or allow “unknown” placeholder if unknown).
+	•	status: must be in allowed list.
+	•	All fields sanitized; national_id format checked if country-specific.
+	•	Error:
+	•	“Invalid suspect status.”
+
+⸻
+
+14. witnesses (array of objects)
+	•	Each witness: { name, contact, statement (text), recorded_at (datetime) }
+	•	Validation:
+	•	name required; statement ≥ 10 characters.
+	•	recorded_at parseable and not future-dated.
+	•	Error:
+	•	“Witness statement is too short.”
+
+⸻
+
+15. evidence (array of attachments)
+	•	Each evidence item: { file, evidence_type, collected_by (user id), collected_at (datetime), description }
+	•	Allowed file types and constraints:
+	•	Images: jpg/jpeg/png/webp — max 10 MB per file, max dimension limit optional (e.g., 8000×8000).
+	•	Video: mp4/mov/webm — max 100 MB (configurable).
+	•	Audio: mp3/wav/m4a — max 20 MB.
+	•	Documents: pdf/docx — max 20 MB.
+	•	Security checks:
+	•	Validate MIME type server-side (not rely on extension).
+	•	Virus scan if available (recommended).
+	•	Strip/examine EXIF metadata for location; either remove or mark based on privacy policy.
+	•	Save files with hashed names outside webroot, generate signed URLs for downloads.
+	•	Metadata validation:
+	•	collected_by must be an active user in station and have the appropriate role (officer/inspector).
+	•	collected_at must be parseable and not future-nonsense.
+	•	Error:
+	•	“File type not supported.” / “File exceeds maximum size of X MB.” / “Uploader not authorized.”
+
+⸻
+
+16. related_fir_id (FK)
+	•	Purpose: link to existing FIR (if the case originates from an FIR).
+	•	Validation:
+	•	If provided, must exist and belong to same station.
+	•	Error:
+	•	“FIR not found or does not belong to this station.”
+
+⸻
+
+17. related_case_ids (array)
+	•	Purpose: link other cases
+	•	Validation:
+	•	Each id must exist and be in same station.
+	•	Error:
+	•	“Related case not found or cross-station link denied.”
+
+⸻
+
+18. tags (array of strings)
+	•	Validation:
+	•	Each tag: 1–30 chars, alphanumeric + -/_, max 20 tags per case.
+	•	Error:
+	•	“Invalid tag.”
+
+⸻
+
+19. confidentiality_level (enum)
+	•	Allowed: ["Public","Restricted","Confidential"]
+	•	Validation:
+	•	Changing to Confidential may require Inspector/Admin role and audit comment.
+	•	Error:
+	•	“Insufficient privileges to set confidentiality.”
+
+⸻
+
+20. created_by, created_at, updated_by, updated_at (audit fields)
+	•	created_by required and set from session — cannot be spoofed by client.
+	•	created_at server timestamp in UTC.
+	•	updated_* set on edits.
+	•	Validation:
+	•	All writes must record these server-side.
+	•	Error:
+	•	(Internal) if session missing: “Authentication required.”
+
+⸻
+
+21. station_id enforced scope
+	•	Validation:
+	•	Always set to configured station id for this deployment.
+	•	Middleware must block any attempt to set or query other station ids.
+	•	Error:
+	•	“Access denied: invalid station scope.”
+
+⸻
+
+22. csrf_token
+	•	Validation:
+	•	Required for all state-changing POST/PUT/DELETE requests.
+	•	Reject if missing/expired.
+	•	Error:
+	•	“Invalid CSRF token.”
+
+⸻
+
+23. role & permission checks (system-level validations)
+	•	Only users with proper roles can perform actions:
+	•	Create Case: roles clerk, inspector, admin, officer (if policy allows).
+	•	Set final disposition / close case: only inspector or admin.
+	•	Assign officer/inspector: admin or inspector (as per policy).
+	•	Validation:
+	•	Enforce via @roles_required(...) decorator + object-level check current_user.can('assign', case).
+	•	Error:
+	•	403 Forbidden with message: “You do not have permission to perform this action.”
+
+⸻
+
+24. input sanitation & XSS protections
+	•	All text fields must be sanitized server-side:
+	•	Escape HTML in outputs.
+	•	For allowed rich text, use a whitelist sanitizer (strip scripts, style, iframe).
+	•	Reject suspicious inputs (scripts, long repetitive payloads).
+	•	Error:
+	•	“Invalid characters in input.”
+
+⸻
+
+25. rate limiting & abuse prevention
+	•	Validation:
+	•	Limit case creation rate per user/IP (e.g., 10 cases/hour) to prevent abuse.
+	•	Error:
+	•	“Rate limit exceeded. Try again later.”
+
+⸻
+
+26. audit record creation
+	•	Every successful write (create/update/delete/status change) must create an immutable audit entry with:
+	•	user_id, user_role, action, object_type, object_id, before_snapshot (optional), after_snapshot (optional), ip, timestamp.
+	•	Validation:
+	•	If audit write fails, rollback operation (atomic transaction).
+	•	Error:
+	•	“Operation failed: audit logging failed.”
+
+⸻
+
+27. file retention & deletion policy
+	•	Validate uploaded evidence respects retention policy settings (admin-configured).
+	•	If deletion requested:
+	•	Only Admin/Inspector can request evidence deletion; must create an audit trail and require 2-step confirmation.
+	•	Error:
+	•	“Not authorized to delete evidence.”
+
+⸻
+
+28. concurrency & optimistic locking
+	•	Validation:
+	•	Use updated_at/version field; when updating ensure version matches to avoid lost updates.
+	•	Error:
+	•	“This case was modified by another user — refresh and try again.”
+
+⸻
+
+29. response formatting & error codes
+	•	For failed field validation return HTTP 400 with JSON:
+
+{
+  "errors": {
+    "title": "Provide a short case title (5–150 chars).",
+    "incident_date_time": "Invalid incident date."
+  }
+}
+
+	•	For permission errors return 403 with message.
+	•	For not found return 404.
+	•	For CSRF invalid return 400 with message.
+
+⸻
+
+30. UI behaviour & progressive disclosure
+	•	Client-side validation should mirror server rules:
+	•	Required fields indicated visually.
+	•	Date picker uses ISO format and timezone.
+	•	Map pin drops fill address fields.
+	•	Attachment pre-checks file type and size before upload.
+	•	When user attempts actions not permitted by role, hide the action and return 403 if attempted via API.
+
+⸻
+
+Example error messages (consistent style)
+	•	Required: “This field is required.”
+	•	Format: “Enter a valid [field name] (example: YYYY-MM-DDThh:mm:ssZ).”
+	•	Auth: “You are not authorized to perform this action.”
+	•	Station-scope: “Access denied: station mismatch.”
+	•	File: “File exceeds maximum size of 10 MB” / “Unsupported file type.”
+
+⸻
+
+Implementation checklist (quick)
+	•	Add enums and DB constraints for category, status, priority, confidentiality.
+	•	Add DB unique index for (station_id, case_number).
+	•	Validate all FKs exist and belong to same station.
+	•	Sanitize rich text and escape all outputs.
+	•	Enforce CSRF and session validation.
+	•	Enforce role checks via decorators + object-level can() helper.
+	•	Generate audit logs for every write; rollback on audit failure.
+	•	Implement file validation and safe storage with signed download URLs.
+	•	Add optimistic locking/version column.
+
+⸻
+
+If you want, I can now generate:
+	•	a ready-to-copy WTForms/Flask-WTF form class for the Add Case form with all fields & validators, or
+	•	an API JSON schema (OpenAPI/JSON Schema) for the Case create endpoint with these validations. Which would you like me to produce next?

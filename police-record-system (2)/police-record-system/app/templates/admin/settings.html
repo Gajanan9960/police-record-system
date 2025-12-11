@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mx-auto px-4 max-w-2xl">
+    <h2 class="text-3xl font-bold text-cyan-400 mb-6">Station Settings</h2>
+
+    <div class="bg-slate-800 rounded-lg shadow border border-slate-700 p-6">
+        <form method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+
+            <div class="mb-4">
+                <label class="block text-gray-400 text-sm font-bold mb-2">Station Name</label>
+                <input type="text" name="name" value="{{ station.name }}" required
+                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-slate-700 border-slate-600 text-white">
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-gray-400 text-sm font-bold mb-2">Address</label>
+                <textarea name="address" rows="3"
+                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-slate-700 border-slate-600 text-white">{{ station.address }}</textarea>
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-gray-400 text-sm font-bold mb-2">Contact Information</label>
+                <input type="text" name="contact_info" value="{{ station.contact_info }}"
+                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-slate-700 border-slate-600 text-white">
+            </div>
+
+            <div class="mb-6">
+                <label class="block text-gray-400 text-sm font-bold mb-2">FIR Prefix Format</label>
+                <input type="text" name="fir_prefix_format" value="{{ station.fir_prefix_format }}"
+                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-slate-700 border-slate-600 text-white">
+                <p class="text-xs text-gray-500 mt-1">Use {year} and {num} placeholders. Example: FIR-{year}-{num}</p>
+            </div>
+
+            <div class="flex items-center justify-between">
+                <button type="submit"
+                    class="bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                    Save Settings
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

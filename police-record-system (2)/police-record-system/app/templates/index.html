@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mx-auto px-4 py-8 text-center">
+    <h1 class="text-4xl font-bold mb-4 text-cyan-400">Police Record Management System</h1>
+    <p class="text-xl text-gray-300 mb-8">Secure, Efficient, and Reliable.</p>
+    {% if not current_user.is_authenticated %}
+    <a href="{{ url_for('auth.login') }}"
+        class="bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-2 px-4 rounded">Login</a>
+    <a href="{{ url_for('auth.register') }}"
+        class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded ml-4">Register</a>
+    {% else %}
+    <a href="{{ url_for('dashboard.officer_dashboard') }}"
+        class="bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-2 px-4 rounded">Go to Dashboard</a>
+    {% endif %}
+</div>
+{% endblock %}

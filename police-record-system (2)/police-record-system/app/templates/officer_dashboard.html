@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mx-auto px-4">
+    <h2 class="text-3xl font-bold text-cyan-400 mb-8">Officer Dashboard</h2>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <!-- Responsibilities Card -->
+        <div class="bg-slate-800 rounded-lg p-6 border border-slate-700 shadow-lg col-span-1">
+            <h3 class="text-xl font-bold text-white mb-4">My Responsibilities</h3>
+            <ul class="space-y-2 text-gray-300 text-sm">
+                <li class="flex items-start">
+                    <i class="fas fa-search text-cyan-400 mt-1 mr-2"></i>
+                    <span><strong>Investigate Cases:</strong> Conduct thorough investigations for assigned cases.</span>
+                </li>
+                <li class="flex items-start">
+                    <i class="fas fa-file-alt text-cyan-400 mt-1 mr-2"></i>
+                    <span><strong>Record Statements:</strong> Interview witnesses, victims, and suspects.</span>
+                </li>
+                <li class="flex items-start">
+                    <i class="fas fa-box-open text-cyan-400 mt-1 mr-2"></i>
+                    <span><strong>Collect Evidence:</strong> Secure and log physical/digital evidence.</span>
+                </li>
+                <li class="flex items-start">
+                    <i class="fas fa-book text-cyan-400 mt-1 mr-2"></i>
+                    <span><strong>Update Diary:</strong> Log daily investigation progress.</span>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Stats / Quick Actions -->
+        <div
+            class="bg-slate-800 rounded-lg p-6 border border-slate-700 shadow-lg col-span-1 lg:col-span-2 flex flex-col justify-center">
+            <div class="grid grid-cols-2 gap-4">
+                <div class="bg-slate-700 p-4 rounded text-center">
+                    <span class="block text-3xl font-bold text-white">{{ cases|length }}</span>
+                    <span class="text-gray-400 text-xs uppercase">Assigned Cases</span>
+                </div>
+                <div class="bg-slate-700 p-4 rounded text-center">
+                    <span class="block text-3xl font-bold text-green-400">
+                        {{ cases|selectattr("status", "equalto", "Open")|list|length }}
+                    </span>
+                    <span class="text-gray-400 text-xs uppercase">Active Cases</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-slate-800 rounded-lg shadow border border-slate-700 overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-700 flex justify-between items-center">
+            <h3 class="text-xl font-bold text-white">My Assigned Cases</h3>
+            <!-- Removed New Case button as IOs typically work on assigned cases -->
+        </div>
+
+        {% if cases %}
+        <table class="min-w-full leading-normal">
+            <thead>
+                <tr>
+                    <th
+                        class="px-5 py-3 border-b-2 border-slate-700 bg-slate-900 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                        Case #</th>
+                    <th
+                        class="px-5 py-3 border-b-2 border-slate-700 bg-slate-900 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                        Title</th>
+                    <th
+                        class="px-5 py-3 border-b-2 border-slate-700 bg-slate-900 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                        Status</th>
+                    <th
+                        class="px-5 py-3 border-b-2 border-slate-700 bg-slate-900 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                        Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for case in cases %}
+                <tr>
+                    <td class="px-5 py-5 border-b border-slate-700 bg-slate-800 text-sm text-gray-300">{{
+                        case.case_number }}</td>
+                    <td class="px-5 py-5 border-b border-slate-700 bg-slate-800 text-sm text-gray-300">{{ case.title }}
+                    </td>
+                    <td class="px-5 py-5 border-b border-slate-700 bg-slate-800 text-sm">
+                        <span
+                            class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                            {% if case.status == 'Open' %}bg-green-100 text-green-800{% elif case.status == 'Closed' %}bg-red-100 text-red-800{% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                            {{ case.status }}
+                        </span>
+                    </td>
+                    <td class="px-5 py-5 border-b border-slate-700 bg-slate-800 text-sm">
+                        <a href="{{ url_for('cases.case_detail', case_id=case.id) }}"
+                            class="text-cyan-400 hover:text-cyan-300">View</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="p-6 text-center text-gray-500">
+            No cases assigned to you yet.
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
