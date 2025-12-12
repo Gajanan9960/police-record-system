@@ -35,7 +35,7 @@ def admin_dashboard():
     # SHO Tasks (Merged for Admin)
     pending_firs_list = station_scoped(FIR.query).filter_by(status='Pending', forwarded_to_sho=True).all()
     active_cases = station_scoped(Case.query).filter(Case.status.in_(['Open', 'In Progress'])).all()
-    ios = station_scoped(User.query).filter_by(role='io').all()
+    assignable_officers = station_scoped(User.query).filter(User.role.in_(['io', 'officer'])).all()
     
     return render_template('admin_dashboard.html', 
                            total_cases=total_cases, 
@@ -47,7 +47,7 @@ def admin_dashboard():
                            status_counts=status_counts,
                            pending_firs_list=pending_firs_list,
                            active_cases=active_cases,
-                           ios=ios)
+                           ios=assignable_officers)
 
 @dashboard.route('/dashboard/officer')
 @login_required
@@ -65,10 +65,12 @@ def inspector_dashboard():
     # SHO Tasks (Merged for Inspector)
     pending_firs_list = station_scoped(FIR.query).filter_by(status='Pending', forwarded_to_sho=True).all()
     active_cases = station_scoped(Case.query).filter(Case.status.in_(['Open', 'In Progress'])).all()
-    ios = station_scoped(User.query).filter_by(role='io').all()
+    
+    # Fetch IOs and Officers for assignment
+    assignable_officers = station_scoped(User.query).filter(User.role.in_(['io', 'officer'])).all()
     
     return render_template('inspector_dashboard.html', 
                            cases=all_cases,
                            pending_firs_list=pending_firs_list,
                            active_cases=active_cases,
-                           ios=ios)
+                           ios=assignable_officers)

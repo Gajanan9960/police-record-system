@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mx-auto px-4 max-w-2xl">
+    <h2 class="text-3xl font-bold text-cyan-400 mb-6">Create New User</h2>
+
+    <div class="bg-slate-800 rounded-lg shadow border border-slate-700 p-6">
+        <form method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="mb-4">
+                    <label class="block text-gray-400 text-sm font-bold mb-2">Username</label>
+                    <input type="text" name="username" required
+                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-slate-700 border-slate-600 text-white">
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-gray-400 text-sm font-bold mb-2">Email</label>
+                    <input type="email" name="email" required
+                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-slate-700 border-slate-600 text-white">
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-gray-400 text-sm font-bold mb-2">Full Name</label>
+                <input type="text" name="full_name" required
+                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-slate-700 border-slate-600 text-white">
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="mb-4">
+                    <label class="block text-gray-400 text-sm font-bold mb-2">Role</label>
+                    <select name="role" id="role" required
+                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-slate-700 border-slate-600 text-white">
+                        <option value="admin">Admin</option>
+                        <option value="sho">SHO</option>
+                        <option value="inspector">Inspector</option>
+                        <option value="io">Investigating Officer (IO)</option>
+                        <option value="officer">Officer</option>
+                        <option value="clerk">Clerk</option>
+                        <option value="malkhana">Evidence Custodian</option>
+                        <option value="forensic">Forensic Expert</option>
+                        <option value="court">Court Liaison</option>
+                    </select>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-gray-400 text-sm font-bold mb-2">Password</label>
+                    <input type="password" name="password" required
+                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-slate-700 border-slate-600 text-white">
+                </div>
+            </div>
+
+            <div class="mb-4 hidden" id="inspector-field">
+                <label class="block text-gray-400 text-sm font-bold mb-2">Report to Inspector</label>
+                <select name="inspector_id"
+                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-slate-700 border-slate-600 text-white">
+                    <option value="">Select Inspector</option>
+                    {% for inspector in inspectors %}
+                    <option value="{{ inspector.id }}">{{ inspector.full_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="flex items-center justify-between mt-6">
+                <button type="submit"
+                    class="bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-2 px-6 rounded focus:outline-none focus:shadow-outline">
+                    Create User
+                </button>
+                <a href="{{ url_for('admin.users') }}"
+                    class="text-gray-400 hover:text-white text-sm font-bold">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.getElementById('role').addEventListener('change', function () {
+        const inspectorField = document.getElementById('inspector-field');
+        if (this.value === 'officer') {
+            inspectorField.classList.remove('hidden');
+        } else {
+            inspectorField.classList.add('hidden');
+        }
+    });
+</script>
+{% endblock %}

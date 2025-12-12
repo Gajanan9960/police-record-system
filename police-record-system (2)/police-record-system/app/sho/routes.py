@@ -16,10 +16,10 @@ def dashboard():
     # Active Cases (Open or In Progress)
     active_cases = Case.query.filter(Case.status.in_(['Open', 'In Progress'])).all()
     
-    # List of IOs for assignment
-    ios = User.query.filter_by(role='io').all()
+    # List of IOs and Officers for assignment
+    assignable_officers = User.query.filter(User.role.in_(['io', 'officer'])).all()
     
-    return render_template('sho/dashboard.html', pending_firs=pending_firs, active_cases=active_cases, ios=ios)
+    return render_template('sho/dashboard.html', pending_firs=pending_firs, active_cases=active_cases, ios=assignable_officers)
 
 @sho.route('/fir/<int:fir_id>/approve', methods=['POST'])
 @login_required

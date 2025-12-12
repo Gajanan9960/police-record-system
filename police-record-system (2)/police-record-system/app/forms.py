@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, BooleanField, SelectField, TextAreaField, DateField, FileField, DateTimeField, MultipleFileField
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, SelectField, TextAreaField, DateField, FileField, DateTimeField, MultipleFileField, SelectMultipleField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError, Optional
 from datetime import datetime, timedelta
 from app.models import User
@@ -58,10 +58,12 @@ class CaseForm(FlaskForm):
     # Classification
     priority = SelectField('Priority', choices=[('Low', 'Low'), ('Medium', 'Medium'), ('High', 'High'), ('Critical', 'Critical')], default='Medium')
     status = SelectField('Initial Status', choices=[
-        ('New', 'New'), ('Under Investigation', 'Under Investigation'), 
-        ('FIR Filed', 'FIR Filed'), ('Assigned', 'Assigned'),
-        ('Closed', 'Closed'), ('Rejected', 'Rejected')
-    ], default='New')
+        ('Open', 'Open'), 
+        ('In Progress', 'In Progress'), 
+        ('Closed', 'Closed'), 
+        ('Court', 'Court'),
+        ('Pending', 'Pending')
+    ], default='Open')
     linked_fir_id = StringField('Linked FIR Number (Optional)', validators=[Optional()])
     related_case_ids = StringField('Related Case IDs (comma separated)', validators=[Optional()])
     
@@ -71,11 +73,12 @@ class CaseForm(FlaskForm):
     
     # Assignment
     assigned_officer_id = SelectField('Lead Inspector', coerce=int, validators=[Optional()])
-    officer_ids = SelectField('Assign Officers', coerce=int, validators=[Optional()])
+    officer_ids = SelectMultipleField('Assign Officers', coerce=int, validators=[Optional()])
     
     # Evidence
     evidence_files = MultipleFileField('Upload Evidence (Photos/Docs)', validators=[Optional()])
     evidence_description = StringField('Evidence Description', validators=[Optional()])
+    evidence_collected_at = DateTimeField('Date Evidence Collected', format='%Y-%m-%dT%H:%M', validators=[Optional()])
     
     # Legal
     is_cognizable = SelectField('Offense Category', choices=[('True', 'Cognizable'), ('False', 'Non-Cognizable')], coerce=lambda x: x == 'True')
@@ -89,13 +92,39 @@ class CaseForm(FlaskForm):
     def validate_incident_date(self, incident_date):
         if incident_date.data > datetime.utcnow() + timedelta(hours=1):
             raise ValidationError('Incident date cannot be in the future.')
-    
+        
+        start_allowed_date = datetime.utcnow() - timedelta(days=180) # 6 months
+        if incident_date.data < start_allowed_date:
+            raise ValidationError('Incident date cannot be older than 6 months.')
+
     def validate_case_number(self, case_number):
          # If provided, check uniqueness (Optional simple check, real check in route/db)
          if case_number.data:
              from app.models import Case
              # scoped check logic is complex inside form without current_user/context awareness easily
              pass
+
+    def validate_evidence_collected_at(self, evidence_collected_at):
+        if evidence_collected_at.data:
+            if evidence_collected_at.data > datetime.utcnow() + timedelta(minutes=1): # Small buffer for server time diff
+                raise ValidationError('Evidence collection time cannot exceed the current date and time.')
+            
+            # Note: Cross-field validation vs incident_date is handled in validate()
+
+    def validate(self, extra_validators=None):
+        if not super(CaseForm, self).validate(extra_validators):
+            return False
+        
+        # Cross-field validation: Evidence Date vs Incident Date
+        if self.evidence_files.data: 
+            # Check if actual files were uploaded (Flask-WTF usually has filename if selected)
+            # Or relying on evidence_collected_at being optional strictly unless files are there?
+            # Simpler: If a date is provided, validate it.
+            if self.evidence_collected_at.data and self.incident_date.data:
+                if self.evidence_collected_at.data < self.incident_date.data:
+                    self.evidence_collected_at.errors.append('Evidence cannot be collected before the incident occurred.')
+                    return False
+        return True
 
 class FIRForm(FlaskForm):
     fir_number = StringField('FIR Number', validators=[DataRequired()])

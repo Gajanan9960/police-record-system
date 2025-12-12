@@ -1,0 +1,145 @@
+CASES FOR MANUAL ENTRY - MH26 (Nanded, Maharashtra)
+-------------------------------------------------------
+
+CASE 1: TWO-WHEELER THEFT
+-------------------------
+Title: Theft of Hero Splendor from Vazirabad Market
+Offense Type: Theft
+Short Description: Black Hero Splendor Plus stolen from parking area outside Hotel City Pride.
+Detailed Description: The complainant parked his motorcycle, a Black Hero Splendor Plus (MH-26-BE-1234), outside Hotel City Pride, Vazirabad at approximately 14:00 hours. Upon returning at 15:30 hours, the vehicle was missing. Inquiries with nearby shopkeepers yielded no results. CCTV footage from the hotel shows a suspect in a red cap using a master key to unlock the bike and drive away towards Station Road.
+Incident Date: 2025-12-10T14:00
+Location: Outside Hotel City Pride, Vazirabad
+(Note: Auto-suffix will add ", Nanded, Maharashtra")
+Priority: Medium
+Status: Open
+IPC Sections: 379
+Is Cognizable: Yes
+
+Tags: vehicle-theft, vazirabad-market, master-key
+Related Case IDs: (Leave Empty)
+
+Participants:
+1. Type: Complainant
+   Name: Rajesh Rameshwar Patil
+   Contact: 9876543210
+   Address: Plot 45, Srinagar, Nanded
+   Details: Owner of the bike.
+
+2. Type: Suspect
+   Name: Unknown Male (Red Cap)
+   Details: Seen in CCTV footage heading towards Station Road.
+
+Evidence:
+1. Description: CCTV Footage from Hotel City Pride
+   Collected At: 2025-12-10T16:00
+   (Note: Must be after Incident Date)
+
+---
+
+CASE 2: NIGHT BURGLARY (SHOP BREAK-IN)
+--------------------------------------
+Title: Night Burglary at Electronics Shop in Shivaji Nagar
+Offense Type: Burglary
+Short Description: Shutters of 'Om Electronics' broken, cash and mobile phones stolen.
+Detailed Description: During the night patrol, beat marshals noticed the shutter of 'Om Electronics' in Shivaji Nagar was partially open with the lock broken. Owners were informed. Preliminary inventory suggests theft of roughly ₹50,000 in cash from the counter and 12 smartphones (Samsung and Vivo models). Fingerprints have been lifted from the cash drawer handled by the intruders.
+Incident Date: 2025-12-09T02:30
+Location: Om Electronics, Main Road, Shivaji Nagar
+Priority: High
+Status: In Progress
+IPC Sections: 457, 380
+Is Cognizable: Yes
+
+Tags: night-burglary, electronics-theft, shivaji-nagar
+Related Case IDs: (Leave Empty)
+
+Participants:
+1. Type: Victim (Owner)
+   Name: Suresh Kumar Jain
+   Contact: 9988776655
+   Address: Flat 102, Galaxy Apartment, Shivaji Nagar, Nanded
+
+2. Type: Witness
+   Name: Constable Ajay Rathod (Beat Marshal)
+   Details: First responder who noticed the broken lock.
+
+Evidence:
+1. Description: Broken Padlock and Clasp
+   Collected At: 2025-12-09T03:15
+
+2. Description: Fingerprint Samples from Cash Drawer
+   Collected At: 2025-12-09T04:00
+
+---
+
+CASE 3: ONLINE UPI FRAUD
+------------------------
+Title: Online Fraud via Fake Electricity Bill Message
+Offense Type: Cybercrime
+Short Description: Victim defrauded of ₹25,000 via phishing link for electricity bill payment.
+Detailed Description: The victim received a text message claiming his MSEDCL electricity connection would be disconnected tonight due to unpaid bills. He clicked the link provided and entered his UPI PIN as requested by the support executive on the call. An amount of ₹25,000 was immediately debited from his SBI account. The number traces to a disposable SIM card.
+Incident Date: 2025-12-08T10:45
+Location: CIDCO Colony, New Nanded
+Priority: Medium
+Status: In Progress
+IPC Sections: 420; 66C, 66D IT Act
+Is Cognizable: Yes
+
+Tags: upi-fraud, phishing, cyber-cell
+Related Case IDs: (Leave Empty)
+
+Participants:
+1. Type: Victim
+   Name: Anjali Deshmukh
+   Contact: 9123456789
+   Address: Row House 7, CIDCO, Nanded
+
+2. Type: Suspect
+   Name: Unknown (Phone Holder: 90000xxxxx)
+   Details: Traced to a fake ID in West Bengal circle.
+
+Evidence:
+1. Description: Screenshots of SMS and UPI Transaction
+   Collected At: 2025-12-08T12:00
+
+2. Description: Bank Account Statement (PDF)
+   Collected At: 2025-12-08T14:00
+
+---
+
+CASE 4: ASSAULT AND RIOTING
+---------------------------
+Title: Group Clash and Assault at Gokul Nagar
+Offense Type: Assault
+Short Description: Clash between two groups over a parking dispute resulting in minor injuries.
+Detailed Description: A dispute over parking a chaotic Rickshaw turned violent in Gokul Nagar. Two groups of approximately 5-6 youths engaged in a physical altercation using sticks and stones. Three individuals sustained minor head injuries and were taken to Civil Hospital. Glass windows of a nearby tea stall were damaged. The situation was brought under control by the patrolling van.
+Incident Date: 2025-12-11T09:15
+Location: Near Hanuman Temple, Gokul Nagar
+Priority: High
+Status: Pending
+IPC Sections: 147, 148, 323, 336
+Is Cognizable: Yes
+
+Tags: group-clash, public-disorder, gokul-nagar
+Related Case IDs: (Leave Empty)
+
+Participants:
+1. Type: Complainant
+   Name: Vinod Kambli
+   Contact: 8888888888
+   Address: Gokul Nagar, Nanded
+   Details: Auto-rickshaw driver involved in dispute.
+
+2. Type: Suspect
+   Name: Local Group (Leader: 'Raju')
+   Details: Approximately 5 unidentified youths from nearby slum.
+
+3. Type: Victim (Injured)
+   Name: Santosh Waghmare
+   Details: Sustained head injury, admitted to Civil Hospital.
+
+Evidence:
+1. Description: Recovered Wooden Sticks (2) and Stones
+   Collected At: 2025-12-11T09:45
+
+2. Description: Medical Report (MLC) of Santosh Waghmare
+   Collected At: 2025-12-11T11:00

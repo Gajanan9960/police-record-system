@@ -215,6 +215,7 @@ class Evidence(db.Model):
     location = db.Column(db.String(100)) # Shelf A, Server, etc.
     status = db.Column(db.String(50), default='In Custody') # In Custody, Checked Out, Destroyed
     qr_code = db.Column(db.String(100))
+    collected_at = db.Column(db.DateTime, default=datetime.utcnow)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
     station = db.relationship('Station', backref='evidence')

@@ -66,6 +66,24 @@ def create_user():
     inspectors = User.query.filter_by(station_id=current_user.station_id, role='inspector').all()
     return render_template('admin/create_user.html', inspectors=inspectors)
 
+@admin.route('/admin/users/<int:user_id>/delete', methods=['POST'])
+@login_required
+@admin_required
+def delete_user(user_id):
+    user = User.query.get_or_404(user_id)
+    if user.station_id != current_user.station_id:
+        return render_template('403.html'), 403
+        
+    if user.id == current_user.id:
+        flash('You cannot delete yourself.', 'warning')
+        return redirect(url_for('admin.users'))
+        
+    db.session.delete(user)
+    db.session.commit()
+    log_audit('DELETE', 'User', user.id, f"Deleted user {user.username}")
+    flash(f'User {user.username} deleted successfully.', 'success')
+    return redirect(url_for('admin.users'))
+
 @admin.route('/admin/settings', methods=['GET', 'POST'])
 @login_required
 @admin_required

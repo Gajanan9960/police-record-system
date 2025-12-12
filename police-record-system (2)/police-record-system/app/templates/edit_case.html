@@ -1,7 +1,13 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="container mx-auto px-4 max-w-4xl">
-    <h2 class="text-3xl font-bold text-cyan-400 mb-6">New Case Incident Report</h2>
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-3xl font-bold text-cyan-400">Edit Case: {{ case.case_number }}</h2>
+        <a href="{{ url_for('cases.case_detail', case_id=case.id) }}"
+            class="bg-slate-700 hover:bg-slate-600 text-cyan-400 font-bold py-2 px-4 rounded border border-slate-600">
+            <i class="fas fa-arrow-left mr-2"></i>Back to Detail
+        </a>
+    </div>
 
     <div class="bg-slate-800 rounded-lg shadow border border-slate-700 p-6">
         <form method="POST" enctype="multipart/form-data">
@@ -14,9 +20,9 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-gray-400 text-sm font-bold mb-2">Case Number</label>
-                        {{ form.case_number(class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700
-                        leading-tight focus:outline-none focus:shadow-outline bg-slate-700 border-slate-600 text-white",
-                        placeholder="Auto-generated if empty") }}
+                        {{ form.case_number(class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-500
+                        leading-tight focus:outline-none bg-slate-800 border-slate-600 cursor-not-allowed",
+                        readonly=True) }}
                     </div>
                     <div>
                         <label class="block text-gray-400 text-sm font-bold mb-2">Linked FIR (Optional)</label>
@@ -106,10 +112,75 @@
 
             <!-- Section 3: Participants -->
             <div class="mb-8 border-b border-slate-700 pb-4">
-                <h3 class="text-xl font-bold text-white mb-4"><i class="fas fa-users mr-2"></i>Participants (Victims,
-                    Suspects, etc.)</h3>
+                <h3 class="text-xl font-bold text-white mb-4"><i class="fas fa-users mr-2"></i>Participants</h3>
                 <div id="participants-container">
-                    <!-- Dynamic Rows appended here -->
+                    <!-- Existing participants rendered here -->
+                    {% for p in case.participants %}
+                    <div
+                        class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4 bg-slate-700 p-4 rounded border border-slate-600 relative participant-row">
+                        <!-- Note: Removing participants in Edit mode via simple JS removal works visually 
+                             but backend needs to know to DELETE them. 
+                             For simple MVP: We keep them as inputs. If user clears name, we ignore/delete? 
+                             Or better: Add a hidden input for ID to track updates. -->
+                        <input type="hidden" name="participant_id[]" value="{{ p.id }}">
+
+                        <button type="button" onclick="this.parentElement.remove()"
+                            class="absolute top-2 right-2 text-red-400 hover:text-red-300"><i
+                                class="fas fa-times"></i></button>
+                        <div>
+                            <label class="block text-gray-400 text-xs font-bold mb-1">Type</label>
+                            <div class="relative">
+                                <select name="participant_type[]"
+                                    class="block appearance-none w-full bg-slate-800 text-white text-sm rounded border border-slate-500 p-2 pr-8 leading-tight focus:outline-none focus:shadow-outline">
+                                    <option value="Victim" {% if p.type=='Victim' %}selected{% endif %}>Victim</option>
+                                    <option value="Suspect" {% if p.type=='Suspect' %}selected{% endif %}>Suspect
+                                    </option>
+                                    <option value="Witness" {% if p.type=='Witness' %}selected{% endif %}>Witness
+                                    </option>
+                                    <option value="Complainant" {% if p.type=='Complainant' %}selected{% endif %}>
+                                        Complainant</option>
+                                </select>
+                                <div
+                                    class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
+                                    <i class="fas fa-chevron-down text-xs"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-gray-400 text-xs font-bold mb-1">Name</label>
+                            <input type="text" name="participant_name[]" value="{{ p.name }}"
+                                class="bg-slate-800 text-white text-sm rounded border border-slate-500 w-full p-2"
+                                required>
+                        </div>
+                        <div>
+                            <label class="block text-gray-400 text-xs font-bold mb-1">Contact</label>
+                            <input type="text" name="participant_contact[]" value="{{ p.contact_info or '' }}"
+                                class="bg-slate-800 text-white text-sm rounded border border-slate-500 w-full p-2">
+                        </div>
+                        <div>
+                            <label class="block text-gray-400 text-xs font-bold mb-1">National ID</label>
+                            <input type="text" name="participant_national_id[]" value="{{ p.national_id or '' }}"
+                                class="bg-slate-800 text-white text-sm rounded border border-slate-500 w-full p-2">
+                        </div>
+                        <div>
+                            <label class="block text-gray-400 text-xs font-bold mb-1">DOB</label>
+                            <input type="date" name="participant_dob[]"
+                                value="{{ p.dob.strftime('%Y-%m-%d') if p.dob else '' }}"
+                                class="bg-slate-800 text-white text-sm rounded border border-slate-500 w-full p-2">
+                        </div>
+                        <div class="col-span-3">
+                            <label class="block text-gray-400 text-xs font-bold mb-1">Address</label>
+                            <input type="text" name="participant_address[]" value="{{ p.address or '' }}"
+                                class="bg-slate-800 text-white text-sm rounded border border-slate-500 w-full p-2">
+                        </div>
+                        <div class="col-span-1 md:col-span-4">
+                            <label class="block text-gray-400 text-xs font-bold mb-1">Details/Statement</label>
+                            <textarea name="participant_details[]"
+                                class="bg-slate-800 text-white text-sm rounded border border-slate-500 w-full p-2"
+                                rows="2">{{ p.details or '' }}</textarea>
+                        </div>
+                    </div>
+                    {% endfor %}
                 </div>
                 <button type="button" onclick="addParticipant()"
                     class="bg-gray-700 hover:bg-gray-600 text-white text-sm font-bold py-2 px-4 rounded border border-gray-600 mt-2">
@@ -146,7 +217,8 @@
                             {% for value, label in form.officer_ids.choices %}
                             <div class="flex items-center mb-2 last:mb-0">
                                 <input type="checkbox" name="officer_ids" value="{{ value }}" id="officer-{{ value }}"
-                                    class="w-4 h-4 text-cyan-600 bg-slate-800 border-slate-500 rounded focus:ring-cyan-500 focus:ring-2">
+                                    class="w-4 h-4 text-cyan-600 bg-slate-800 border-slate-500 rounded focus:ring-cyan-500 focus:ring-2"
+                                    {% if value in form.officer_ids.data %}checked{% endif %}>
                                 <label for="officer-{{ value }}"
                                     class="ml-2 text-sm text-gray-300 cursor-pointer select-none">{{ label }}</label>
                             </div>
@@ -170,8 +242,8 @@
                     <div>
                         <label class="block text-gray-400 text-sm font-bold mb-2">IPC Sections</label>
                         {{ form.ipc_sections(class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700
-                        leading-tight focus:outline-none focus:shadow-outline bg-slate-700 border-slate-600 text-white",
-                        placeholder="e.g. 302, 307") }}
+                        leading-tight focus:outline-none focus:shadow-outline bg-slate-700 border-slate-600 text-white")
+                        }}
                     </div>
 
                     <div class="col-span-2 space-y-2 mt-4">
@@ -189,25 +261,32 @@
                         </div>
                     </div>
 
-                    <div class="col-span-2 mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-gray-400 text-sm font-bold mb-2">Upload Evidence
-                                (Photos/Docs)</label>
-                            {{ form.evidence_files(class="shadow appearance-none border rounded w-full py-2 px-3
-                            text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-slate-700
-                            border-slate-600 text-white") }}
-                        </div>
-                        <div>
-                            <label class="block text-gray-400 text-sm font-bold mb-2">Date Evidence Collected</label>
-                            {{ form.evidence_collected_at(class="shadow appearance-none border rounded w-full py-2 px-3
-                            text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-slate-700
-                            border-slate-600 text-white", type="datetime-local") }}
-                        </div>
-                        <div class="col-span-2">
-                            <label class="block text-gray-400 text-sm font-bold mb-2">Evidence Description</label>
-                            {{ form.evidence_description(class="shadow appearance-none border rounded w-full py-2 px-3
-                            text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-slate-700
-                            border-slate-600 text-white") }}
+                    <!-- Evidence Upload (Add New) -->
+                    <div class="col-span-2 mt-4 space-y-4">
+                        <h4 class="text-white font-bold text-sm">Add New Evidence</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-gray-400 text-sm font-bold mb-2">Upload Files</label>
+                                {{ form.evidence_files(class="shadow appearance-none border rounded w-full py-2 px-3
+                                text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-slate-700
+                                border-slate-600 text-white") }}
+                            </div>
+                            <div>
+                                <label class="block text-gray-400 text-sm font-bold mb-2">Date Evidence
+                                    Collected</label>
+                                {{ form.evidence_collected_at(class="shadow appearance-none border rounded w-full py-2
+                                px-3
+                                text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-slate-700
+                                border-slate-600 text-white", type="datetime-local") }}
+                            </div>
+                            <div class="col-span-2">
+                                <label class="block text-gray-400 text-sm font-bold mb-2">Description for New
+                                    Evidence</label>
+                                {{ form.evidence_description(class="shadow appearance-none border rounded w-full py-2
+                                px-3
+                                text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-slate-700
+                                border-slate-600 text-white") }}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -215,8 +294,8 @@
 
             <div class="flex items-center justify-between">
                 {{ form.submit(class="bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-2 px-6 rounded
-                focus:outline-none focus:shadow-outline") }}
-                <a href="{{ url_for('cases.list_cases') }}"
+                focus:outline-none focus:shadow-outline", value="Update Case") }}
+                <a href="{{ url_for('cases.case_detail', case_id=case.id) }}"
                     class="inline-block align-baseline font-bold text-sm text-cyan-400 hover:text-cyan-500">
                     Cancel
                 </a>
@@ -227,21 +306,9 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        // 1. Auto-generate Case ID if empty
-        const caseNumField = document.querySelector('[name="case_number"]');
-        if (caseNumField && !caseNumField.value) {
-            fetch('/cases/next-id')
-                .then(response => response.json())
-                .then(data => {
-                    caseNumField.value = data.next_id;
-                })
-                .catch(err => console.error('Error fetching next case ID:', err));
-        }
-
-        // 2. Real-time Date Validation
+        // Validation Logic (Same as Create Case)
         const dateField = document.querySelector('[name="incident_date"]');
         if (dateField) {
-            // Create error message element
             const errorMsg = document.createElement('p');
             errorMsg.className = 'text-red-500 text-xs italic mt-1 hidden';
             dateField.parentNode.appendChild(errorMsg);
@@ -249,11 +316,7 @@
             dateField.addEventListener('input', function () {
                 const inputDate = new Date(this.value);
                 const now = new Date();
-
-                // Add 1 hour buffer for "future" check
                 const bufferTime = new Date(now.getTime() + 60 * 60 * 1000);
-
-                // 6 months ago check
                 const sixMonthsAgo = new Date();
                 sixMonthsAgo.setMonth(now.getMonth() - 6);
 
@@ -270,138 +333,88 @@
                     this.classList.remove('border-red-500');
                 }
             });
-        });
         }
 
-    // 2b. Evidence Date Validation
-    const evidenceDateField = document.querySelector('[name="evidence_collected_at"]');
-    if (evidenceDateField) {
-        const evErrorMsg = document.createElement('p');
-        evErrorMsg.className = 'text-red-500 text-xs italic mt-1 hidden';
-        evidenceDateField.parentNode.appendChild(evErrorMsg);
+        // 2b. Evidence Date Validation
+        const evidenceDateField = document.querySelector('[name="evidence_collected_at"]');
+        if (evidenceDateField) {
+            const evErrorMsg = document.createElement('p');
+            evErrorMsg.className = 'text-red-500 text-xs italic mt-1 hidden';
+            evidenceDateField.parentNode.appendChild(evErrorMsg);
 
-        evidenceDateField.addEventListener('input', function () {
-            const collectedDate = new Date(this.value);
-            const now = new Date();
-            // Strict check: cannot be in future at all. 
-            // However, input type="datetime-local" sets seconds to 00 usually, while new Date() has seconds. 
-            // If user picks "now" (minute precision), it might be slightly behind real "now" (second precision).
-            // But if they pick a future minute, it is definitely future.
-            // we'll treat "now" as allowing up to current minute. 
-
-            // Compare timestamps
-            if (collectedDate.getTime() > now.getTime()) {
-                evErrorMsg.textContent = "Evidence collection time cannot exceed the current date and time.";
-                evErrorMsg.classList.remove('hidden');
-                this.classList.add('border-red-500');
-            } else {
-                // Check vs Incident
-                const incidentField = document.querySelector('[name="incident_date"]');
-                let incidentTime = null;
-                if (incidentField && incidentField.value) {
-                    incidentTime = new Date(incidentField.value);
-                }
-
-                if (incidentTime && collectedDate < incidentTime) {
-                    evErrorMsg.textContent = "Evidence cannot be collected before the incident occurred.";
+            evidenceDateField.addEventListener('input', function () {
+                const collectedDate = new Date(this.value);
+                const now = new Date();
+                if (collectedDate.getTime() > now.getTime()) {
+                    evErrorMsg.textContent = "Evidence collection time cannot exceed the current date and time.";
                     evErrorMsg.classList.remove('hidden');
                     this.classList.add('border-red-500');
                 } else {
-                    evErrorMsg.classList.add('hidden');
-                    this.classList.remove('border-red-500');
+                    const incidentField = document.querySelector('[name="incident_date"]');
+                    let incidentTime = null;
+                    if (incidentField && incidentField.value) {
+                        incidentTime = new Date(incidentField.value);
+                    }
+                    if (incidentTime && collectedDate < incidentTime) {
+                        evErrorMsg.textContent = "Evidence cannot be collected before the incident occurred.";
+                        evErrorMsg.classList.remove('hidden');
+                        this.classList.add('border-red-500');
+                    } else {
+                        evErrorMsg.classList.add('hidden');
+                        this.classList.remove('border-red-500');
+                    }
                 }
-            }
-        });
-    }
+            });
+        }
 
-    // 3. Location Auto-Suffix (MH26 Specific)
-    const locationField = document.querySelector('[name="location"]');
-    if (locationField) {
-        locationField.addEventListener('blur', function () {
-            let val = this.value.trim();
-            if (val && !val.toLowerCase().includes('nanded')) {
-                this.value = `${val}, Nanded, Maharashtra`;
-            }
-        });
-    }
+        // Auto-populate IPC Sections (Offense Type)
+        const offenseSelect = document.getElementById('offense_type');
+        const ipcField = document.getElementById('ipc_sections');
+        const cognizableField = document.getElementById('is_cognizable');
 
-    // 4. Auto-populate IPC Sections based on Offense Type
-    const offenseSelect = document.getElementById('offense_type');
-    const ipcField = document.getElementById('ipc_sections');
-    const cognizableField = document.getElementById('is_cognizable');
+        const ipcMapping = {
+            'Theft': '379',
+            'Burglary': '457, 380',
+            'Assault': '323, 336, 147',
+            'Cybercrime': '420; 66C, 66D IT Act',
+            'Fraud': '420',
+            'Homicide': '302',
+            'Drug': '20 NDPS Act',
+            'Other': ''
+        };
+        const cognizableMapping = {
+            'Theft': 'True', 'Burglary': 'True', 'Assault': 'True',
+            'Cybercrime': 'True', 'Fraud': 'True', 'Homicide': 'True',
+            'Drug': 'True', 'Other': 'True'
+        };
 
-    const ipcMapping = {
-        'Theft': '379',
-        'Burglary': '457, 380',
-        'Assault': '323, 336, 147',
-        'Cybercrime': '420; 66C, 66D IT Act',
-        'Fraud': '420',
-        'Homicide': '302',
-        'Drug': '20 NDPS Act',
-        'Other': ''
-    };
-
-    const cognizableMapping = {
-        'Theft': 'True',
-        'Burglary': 'True',
-        'Assault': 'True',
-        'Cybercrime': 'True',
-        'Fraud': 'True',
-        'Homicide': 'True',
-        'Drug': 'True',
-        'Other': 'True'
-    };
-
-    function updateOffenseDetails() {
-        if (!offenseSelect) return;
-        const selected = offenseSelect.value;
-        console.log("Selected Offense:", selected);
-
-        if (ipcField) {
-            if (ipcMapping[selected] !== undefined) {
+        function updateOffenseDetails() {
+            if (!offenseSelect) return;
+            const selected = offenseSelect.value;
+            if (ipcField && ipcMapping[selected] !== undefined) {
+                // Only update if user explicitly changed offense type? 
+                // In Edit mode, if they change offense type, we likely want to update IPCs.
+                // But valid to warn them or just do it. We'll do it.
                 ipcField.value = ipcMapping[selected];
                 ipcField.classList.add('bg-slate-600');
                 setTimeout(() => ipcField.classList.remove('bg-slate-600'), 300);
-            } else {
-                ipcField.value = '';
             }
-        }
-
-        if (cognizableField) {
-            if (cognizableMapping[selected] !== undefined) {
+            if (cognizableField && cognizableMapping[selected] !== undefined) {
                 cognizableField.value = cognizableMapping[selected];
                 cognizableField.classList.add('bg-slate-600');
                 setTimeout(() => cognizableField.classList.remove('bg-slate-600'), 300);
             }
         }
-    }
-
-    if (offenseSelect) {
-        offenseSelect.addEventListener('change', updateOffenseDetails);
-
-        // Trigger on load if we have a selection and empty fields (or just force it for consistency)
-        // User feedback implies it should "be applied", so forcing it on load if values exist is safe.
-        if (offenseSelect.value) {
-            // Only auto-fill if IPC is empty to avoid overwriting user manual edits on re-render?
-            // But user says "according to Offense Type... applied", implying strict rule.
-            // Let's run it if IPC is empty.
-            if (ipcField && !ipcField.value) {
-                updateOffenseDetails();
-            }
+        if (offenseSelect) {
+            offenseSelect.addEventListener('change', updateOffenseDetails);
         }
-    }
-
-    // 4. Initial Participant Row
-    if (document.getElementById('participants-container').children.length === 0) {
-        addParticipant();
-    }
     });
 
     function addParticipant() {
         const container = document.getElementById('participants-container');
-        const index = container.children.length;
         const html = `
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4 bg-slate-700 p-4 rounded border border-slate-600 relative participant-row">
+        <input type="hidden" name="participant_id[]" value="new">
         <button type="button" onclick="this.parentElement.remove()" class="absolute top-2 right-2 text-red-400 hover:text-red-300"><i class="fas fa-times"></i></button>
         <div>
             <label class="block text-gray-400 text-xs font-bold mb-1">Type</label>

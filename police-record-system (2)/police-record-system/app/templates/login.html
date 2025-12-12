@@ -39,7 +39,8 @@
                 {{ form.remember(class="h-4 w-4 bg-slate-700 border-slate-600 rounded focus:ring-cyan-400") }}
                 {{ form.remember.label(class="ml-2 block text-sm text-gray-300") }}
             </div>
-            <a href="#" class="text-sm text-cyan-400 hover:text-cyan-300">Forgot Password?</a>
+            <a href="{{ url_for('auth.forgot_password') }}" class="text-sm text-cyan-400 hover:text-cyan-300">Forgot
+                Password?</a>
         </div>
         <div class="flex items-center justify-between">
             {{ form.submit(class="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-2 px-4 rounded

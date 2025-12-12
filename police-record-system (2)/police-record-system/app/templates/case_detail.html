@@ -9,6 +9,10 @@
                 <p class="text-sm text-gray-400">Case #: {{ case.case_number }}</p>
             </div>
             <div class="flex items-center space-x-4">
+                <a href="{{ url_for('cases.edit_case', case_id=case.id) }}"
+                    class="bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-1 px-3 rounded text-sm">
+                    <i class="fas fa-edit mr-1"></i> Edit Case
+                </a>
                 <span class="px-3 py-1 rounded-full text-sm font-semibold
                     {% if case.status == 'Open' %}bg-green-200 text-green-900
                     {% elif case.status == 'In Progress' %}bg-yellow-200 text-yellow-900
@@ -83,10 +87,16 @@
                             <div>
                                 <p class="text-gray-300 font-medium">{{ ev.description }}</p>
                                 <p class="text-xs text-gray-500">{{ ev.created_at.strftime('%Y-%m-%d') }} | Custodian:
-                                    {{ ev.custodian.full_name }}</p>
+                                    {{ ev.custodian.full_name if ev.custodian else 'Unknown' }}</p>
                             </div>
+                            {% if ev.location and '.' in ev.location %}
                             <a href="{{ url_for('static', filename='evidence/' + ev.location) }}" target="_blank"
-                                class="text-cyan-400 hover:text-cyan-300 text-sm">View</a>
+                                class="text-cyan-400 hover:text-cyan-300 text-sm">View File</a>
+                            {% elif ev.location %}
+                            <span class="text-gray-400 text-xs">Stored at: {{ ev.location }}</span>
+                            {% else %}
+                            <span class="text-gray-500 text-xs">No location recorded</span>
+                            {% endif %}
                         </div>
                         {% endfor %}
                     </div>

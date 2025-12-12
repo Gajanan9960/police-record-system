@@ -24,3 +24,9 @@ def add_criminal():
         flash('Criminal record added!', 'success')
         return redirect(url_for('criminals.list_criminals'))
     return render_template('add_criminal.html', title='Add Criminal', form=form)
+
+@criminals.route('/criminals/<int:id>')
+@login_required
+def view_criminal(id):
+    criminal = Criminal.query.get_or_404(id)
+    return render_template('criminal_detail.html', title=criminal.name, criminal=criminal)

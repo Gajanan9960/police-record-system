@@ -47,3 +47,9 @@ def register():
 def logout():
     logout_user()
     return redirect(url_for('main.index'))
+    logout_user()
+    return redirect(url_for('main.index'))
+
+@auth.route('/forgot_password')
+def forgot_password():
+    return render_template('forgot_password.html', title='Forgot Password')

@@ -38,7 +38,8 @@
             <div class="bg-slate-900 px-4 py-3 border-t border-slate-700 flex justify-between text-sm">
                 <span class="text-gray-400">DOB: {{ criminal.dob.strftime('%Y-%m-%d') if criminal.dob else 'Unknown'
                     }}</span>
-                <a href="#" class="text-cyan-400 hover:text-cyan-300">View Details</a>
+                <a href="{{ url_for('criminals.view_criminal', id=criminal.id) }}"
+                    class="text-cyan-400 hover:text-cyan-300">View Details</a>
             </div>
         </div>
         {% else %}
