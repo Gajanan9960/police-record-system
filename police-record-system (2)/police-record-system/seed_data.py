@@ -23,7 +23,6 @@ def seed():
         # Create Users
         users_data = [
             {'username': 'admin', 'email': 'admin@police.gov', 'role': 'admin', 'full_name': 'System Admin', 'badge': 'ADM-001'},
-            {'username': 'sho', 'email': 'sho@police.gov', 'role': 'sho', 'full_name': 'Station Head Officer', 'badge': 'SHO-001'},
             {'username': 'inspector', 'email': 'inspector@police.gov', 'role': 'inspector', 'full_name': 'Inspector Gadget', 'badge': 'INS-001'},
             {'username': 'io', 'email': 'io@police.gov.in', 'role': 'io', 'full_name': 'Sub-Inspector Ravi Shinde', 'badge': 'IO123'},
             {'username': 'officer', 'email': 'officer@police.gov.in', 'role': 'officer', 'full_name': 'HC Ajay Rathod', 'badge': 'OFF456'},

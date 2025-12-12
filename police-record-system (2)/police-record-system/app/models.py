@@ -26,6 +26,8 @@ class AuditLog(db.Model):
     details = db.Column(db.Text)
     ip_address = db.Column(db.String(50))
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    user = db.relationship('User', backref=db.backref('audit_logs', lazy=True))
 
 # Association Table for Case <-> Officer (Many-to-Many Assignment)
 case_officers = db.Table('case_officers',

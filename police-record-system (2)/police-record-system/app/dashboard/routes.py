@@ -34,7 +34,7 @@ def admin_dashboard():
     
     # SHO Tasks (Merged for Admin)
     pending_firs_list = station_scoped(FIR.query).filter_by(status='Pending', forwarded_to_sho=True).all()
-    active_cases = station_scoped(Case.query).filter(Case.status.in_(['Open', 'In Progress'])).all()
+    active_cases = station_scoped(Case.query).filter(Case.status.in_(['Open', 'In Progress', 'Pending'])).all()
     assignable_officers = station_scoped(User.query).filter(User.role.in_(['io', 'officer'])).all()
     
     return render_template('admin_dashboard.html', 

@@ -1,0 +1,51 @@
+# Project Roadmap & Missing Features Analysis
+Based on specification (`added.txt`) vs. Current Implementation
+
+## 1. Critical Security Enhancements
+- [ ] **Optimistic Locking**:
+  - *Gap*: The system currently overwrites data without checking if another user modified it.
+  - *Recommendation*: Add a `version` column to `Case` model. Check version on update.
+- [ ] **Rate Limiting**:
+  - *Gap*: No protection against flood attacks (API abuse).
+  - *Recommendation*: Implement `Flask-Limiter` to restrict requests (e.g., 10 cases/hour per user).
+- [ ] **Data Sanitization (XSS)**:
+  - *Gap*: Basic escaping exists, but rich-text/HTML input cleaning is not robust.
+  - *Recommendation*: Integrate `Bleach` library to sanitize `description` fields.
+- [ ] **Virus Scanning**:
+  - *Gap*: Uploaded evidence files are not scanned.
+  - *Recommendation*: Integrate `ClamAV` or similar if hosting in production.
+
+## 2. Advanced Case Workflow
+- [ ] **Evidence Management**:
+  - *Gap*: Users can upload evidence but cannot **delete** or **manage** errors.
+  - *Recommendation*: Add "Delete Evidence" action (Admin/Inspector only) with strict Audit Logging.
+- [ ] **Status Workflow Enforcement**:
+  - *Gap*: Users can switch status to 'Court' without checking if evidence chain is complete.
+  - *Recommendation*: Add pre-condition checks before allowing status transitions.
+- [ ] **Fuzzy Search**:
+  - *Gap*: Current search is basic SQL `LIKE`. Transliteration is a placeholder.
+  - *Recommendation*: Re-integrate `RapidFuzz` or a proper search engine (ElasticSearch/Whoosh) for robust name matching.
+
+## 3. Data Integrity & Validation
+- [ ] **Geospatial Validation**:
+  - *Gap*: GPS coordinates are treated as strings/basic checks.
+  - *Recommendation*: strictly validate formatting (Decimal Degrees) and bounds (-90/90).
+- [ ] **Contact Info Validation**:
+  - *Gap*: Phone numbers are not strictly validated against international standards (E.164).
+  - *Recommendation*: Use `phonenumbers` library for python.
+
+## 4. Architectural Improvements
+- [ ] **Secure File Serving**:
+  - *Gap*: Files are served from `static/`.
+  - *Recommendation*: Move uploads outside webroot and serve via a protected route (`send_from_directory`) with permission checks (Signed URLs).
+- [ ] **Testing**:
+  - *Gap*: Unit and Integration tests are sparse.
+  - *Recommendation*: Create a `tests/` directory and add `pytest` coverage for all Routes and Models.
+
+## 5. UI/UX Polish
+- [ ] **Dashboard Widgets**:
+  - *Gap*: "Recent Activity" is list-based.
+  - *Recommendation*: Add graphical charts (Chart.js) for crime trends.
+- [ ] **Notifications**:
+  - *Gap*: Users only see Flash messages.
+  - *Recommendation*: Add a Notification Center (Bell icon) for async alerts (e.g., "IO Assigned", "Report Ready").

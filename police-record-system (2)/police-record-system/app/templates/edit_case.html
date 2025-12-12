@@ -345,8 +345,9 @@
             evidenceDateField.addEventListener('input', function () {
                 const collectedDate = new Date(this.value);
                 const now = new Date();
-                if (collectedDate.getTime() > now.getTime()) {
-                    evErrorMsg.textContent = "Evidence collection time cannot exceed the current date and time.";
+
+                if (collectedDate > now) {
+                    evErrorMsg.textContent = "Evidence collection date cannot be in the future.";
                     evErrorMsg.classList.remove('hidden');
                     this.classList.add('border-red-500');
                 } else {

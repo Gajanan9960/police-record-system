@@ -43,9 +43,6 @@ def create_app(config_class=Config):
     from app.clerk import clerk as clerk_blueprint
     app.register_blueprint(clerk_blueprint)
     
-    from app.sho import sho as sho_blueprint
-    app.register_blueprint(sho_blueprint)
-    
     from app.io import io as io_blueprint
     app.register_blueprint(io_blueprint)
     

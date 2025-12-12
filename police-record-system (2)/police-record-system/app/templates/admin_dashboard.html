@@ -125,12 +125,12 @@
                         <td class="px-5 py-5 border-b border-slate-700 bg-slate-800 text-sm text-gray-300">{{
                             fir.details[:100] }}...</td>
                         <td class="px-5 py-5 border-b border-slate-700 bg-slate-800 text-sm flex space-x-2">
-                            <form action="{{ url_for('sho.approve_fir', fir_id=fir.id) }}" method="POST">
+                            <form action="{{ url_for('admin.approve_fir', fir_id=fir.id) }}" method="POST">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                                 <button type="submit"
                                     class="text-green-400 hover:text-green-300 font-bold">Approve</button>
                             </form>
-                            <form action="{{ url_for('sho.reject_fir', fir_id=fir.id) }}" method="POST">
+                            <form action="{{ url_for('admin.reject_fir', fir_id=fir.id) }}" method="POST">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                                 <button type="submit" class="text-red-400 hover:text-red-300 font-bold">Reject</button>
                             </form>
@@ -178,7 +178,7 @@
                             {{ case.assignee.full_name if case.assignee else 'Unassigned' }}
                         </td>
                         <td class="px-5 py-5 border-b border-slate-700 bg-slate-800 text-sm">
-                            <form action="{{ url_for('sho.assign_io', case_id=case.id) }}" method="POST"
+                            <form action="{{ url_for('admin.assign_io', case_id=case.id) }}" method="POST"
                                 class="flex items-center space-x-2">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                                 <select name="io_id"
@@ -204,4 +204,87 @@
     </div>
 </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const forms = document.querySelectorAll('form[action*="assign"]');
+
+        forms.forEach(form => {
+            form.addEventListener('submit', async function (e) {
+                e.preventDefault();
+
+                const submitBtn = form.querySelector('button[type="submit"]');
+                const originalBtnText = submitBtn.innerText;
+                submitBtn.innerText = '...';
+                submitBtn.disabled = true;
+
+                const formData = new FormData(form);
+
+                try {
+                    const response = await fetch(form.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
+
+                    const data = await response.json();
+
+                    if (data.status === 'success') {
+                        // Update UI
+                        // Find the row
+                        const row = form.closest('tr');
+                        const ioCell = row.querySelector('td:nth-child(3)'); // 3rd column is Current IO
+                        ioCell.innerText = data.io_name; // Update text
+                        ioCell.classList.add('text-green-400', 'font-bold'); // Highlight logic
+
+                        // Create and show toast/notification
+                        showNotification(data.message, 'success');
+                    } else {
+                        showNotification(data.message || 'Error assigning case', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    showNotification('An unexpected error occurred.', 'error');
+                } finally {
+                    submitBtn.innerText = 'Assigned'; // Keep it visual
+                    setTimeout(() => {
+                        submitBtn.innerText = originalBtnText;
+                        submitBtn.disabled = false;
+                    }, 2000);
+                }
+            });
+        });
+
+        function showNotification(message, type) {
+            // Check if container exists
+            let container = document.getElementById('notification-container');
+            if (!container) {
+                container = document.createElement('div');
+                container.id = 'notification-container';
+                container.className = 'fixed top-4 right-4 z-50 space-y-2';
+                document.body.appendChild(container);
+            }
+
+            const notif = document.createElement('div');
+            const bgColor = type === 'success' ? 'bg-green-600' : 'bg-red-600';
+            notif.className = `${bgColor} text-white px-6 py-3 rounded shadow-lg transition-opacity duration-500 transform translate-x-full`;
+            notif.innerText = message;
+
+            container.appendChild(notif);
+
+            // Animate in
+            requestAnimationFrame(() => {
+                notif.classList.remove('translate-x-full');
+            });
+
+            // Remove after 3s
+            setTimeout(() => {
+                notif.classList.add('opacity-0');
+                setTimeout(() => notif.remove(), 500);
+            }, 3000);
+        }
+    });
+</script>
 {% endblock %}

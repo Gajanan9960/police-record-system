@@ -108,3 +108,82 @@ def settings():
 def audit_logs():
     logs = AuditLog.query.filter_by(station_id=current_user.station_id).order_by(AuditLog.timestamp.desc()).limit(100).all()
     return render_template('admin/audit.html', logs=logs)
+
+# --- Merged SHO Functionality ---
+
+from app.models import FIR, Case
+
+@admin.route('/fir/<int:fir_id>/approve', methods=['POST'])
+@login_required
+@admin_required
+def approve_fir(fir_id):
+    fir = FIR.query.get_or_404(fir_id)
+    if fir.station_id != current_user.station_id:
+        return render_template('403.html'), 403
+
+    fir.status = 'Approved'
+    fir.approved_by_id = current_user.id
+    
+    # Ensure Case status is Open (if it was Pending)
+    if fir.case.status == 'Pending':
+        fir.case.status = 'Open'
+        
+    db.session.commit()
+    log_audit('UPDATE', 'FIR', fir.id, f"FIR {fir.fir_number} approved by Admin")
+    flash(f'FIR {fir.fir_number} approved.', 'success')
+    return redirect(url_for('dashboard.admin_dashboard'))
+
+@admin.route('/fir/<int:fir_id>/reject', methods=['POST'])
+@login_required
+@admin_required
+def reject_fir(fir_id):
+    fir = FIR.query.get_or_404(fir_id)
+    if fir.station_id != current_user.station_id:
+        return render_template('403.html'), 403
+
+    fir.status = 'Rejected'
+    fir.approved_by_id = current_user.id
+    db.session.commit()
+    log_audit('UPDATE', 'FIR', fir.id, f"FIR {fir.fir_number} rejected by Admin")
+    flash(f'FIR {fir.fir_number} rejected.', 'danger')
+    return redirect(url_for('dashboard.admin_dashboard'))
+
+@admin.route('/case/<int:case_id>/assign', methods=['POST'])
+@login_required
+@admin_required
+def assign_io(case_id):
+    case = Case.query.get_or_404(case_id)
+    if case.station_id != current_user.station_id:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return {'status': 'error', 'message': 'Access denied'}, 403
+        return render_template('403.html'), 403
+
+    io_id = request.form.get('io_id')
+    
+    if io_id:
+        case.assigned_officer_id = io_id
+        case.status = 'In Progress'
+        db.session.commit()
+        
+        io_user = User.query.get(io_id)
+        io_name = io_user.full_name if io_user else "Unknown"
+        
+        log_audit('UPDATE', 'Case', case.id, f"Case {case.case_number} assigned to IO #{io_id}")
+        
+        message = f'Case {case.case_number} assigned to {io_name}.'
+        
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+             return {
+                 'status': 'success', 
+                 'message': message, 
+                 'case_number': case.case_number,
+                 'io_name': io_name
+             }
+        
+        flash(message, 'success')
+    else:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return {'status': 'error', 'message': 'Please select an IO.'}, 400
+        flash('Please select an IO.', 'warning')
+        
+    return redirect(url_for('dashboard.admin_dashboard'))

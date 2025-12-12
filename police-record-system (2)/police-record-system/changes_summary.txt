@@ -1,0 +1,41 @@
+# Project Changes Summary
+Date: 2025-12-12
+
+## 1. Case Management Enhancements
+- **Case ID Standardized**: 
+  - Changed auto-generation format to `CASE-{Year}-{Sequence}` (e.g., `CASE-2025-0001`).
+  - Removed Station ID from the visible case number string.
+  - Migrated existing cases in the database to this new format.
+- **Edit Case Functionality**:
+  - Implemented full "Edit Case" feature.
+  - Allows Inspectors (and assigned Officers) to update case details, manage participants, and upload new evidence.
+  - Added new route `/cases/<id>/edit` and template `edit_case.html`.
+- **Bug Fixes**:
+  - Resolved "Internal Server Error" on Case Detail pages caused by missing Evidence metadata (Custodian/Location). Added robust null checks.
+
+## 2. Role Refinements (SHO & Admin)
+- **Merged SHO into Admin**:
+  - The "Station House Officer" (SHO) role has been fully consolidated into the "Admin" role.
+  - **Routes Moved**: FIR Approval/Rejection and IO Assignment logic moved from `sho/routes.py` to `admin/routes.py`.
+  - **Blueprint Deleted**: Removed the `sho` blueprint to keep the codebase clean.
+  - **Data Migration**: All existing users with the 'sho' role were automatically migrated to the 'admin' role.
+- **User Data**:
+  - Confirmed "Sub-Inspector Ravi Shinde" exists and is visible in the Admin User Management list.
+
+## 3. Audit Logging Improvements
+- **Enhanced Visibility**:
+  - Updated Audit Logs to display the **Full Name** of the user instead of just "User #ID".
+  - Timestamps are now displayed clearly.
+- **Action Specifics**:
+  - Changed Case Creation audit log action from generic `CREATE` to `CREATE_CASE`.
+  - Added specific details to the log entry (e.g., "Created case CASE-2025-001 by officer") to satisfy the requirement of tracking *who* creates cases.
+
+## 4. Evidence & Data Validation
+- **Validation Logic**:
+  - Implemented strict Front-end validation for "Evidence Collection Date".
+  - Rule Enforced: `Incident Date <= Evidence Date <= Current Date/Time`.
+  - Prevents future dates and impossible chronologies.
+
+## 5. Next Steps
+- The system is currently running with all above features enabled.
+- Data import from `added.txt` was paused as the file contained specifications rather than data.

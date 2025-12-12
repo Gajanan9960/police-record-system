@@ -44,11 +44,6 @@
                         class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Dashboard</a>
                     {% endif %}
 
-                    {% if current_user.role == 'sho' %}
-                    <a href="{{ url_for('sho.dashboard') }}"
-                        class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Dashboard</a>
-                    {% endif %}
-
                     {% if current_user.role == 'clerk' %}
                     <a href="{{ url_for('clerk.register_fir') }}"
                         class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Register FIR</a>

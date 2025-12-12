@@ -16,7 +16,7 @@ def patch_data():
                 
             # Set default custodian to Case Creator
             if not ev.custodian_id:
-                ev.custodian_id = case.created_by_id
+                ev.custodian_id = case.created_by_id 
             
             # Set default location
             if not ev.location:

@@ -270,131 +270,124 @@
                     this.classList.remove('border-red-500');
                 }
             });
-        });
         }
 
-    // 2b. Evidence Date Validation
-    const evidenceDateField = document.querySelector('[name="evidence_collected_at"]');
-    if (evidenceDateField) {
-        const evErrorMsg = document.createElement('p');
-        evErrorMsg.className = 'text-red-500 text-xs italic mt-1 hidden';
-        evidenceDateField.parentNode.appendChild(evErrorMsg);
+        // 2b. Evidence Date Validation
+        const evidenceDateField = document.querySelector('[name="evidence_collected_at"]');
+        if (evidenceDateField) {
+            const evErrorMsg = document.createElement('p');
+            evErrorMsg.className = 'text-red-500 text-xs italic mt-1 hidden';
+            evidenceDateField.parentNode.appendChild(evErrorMsg);
 
-        evidenceDateField.addEventListener('input', function () {
-            const collectedDate = new Date(this.value);
-            const now = new Date();
-            // Strict check: cannot be in future at all. 
-            // However, input type="datetime-local" sets seconds to 00 usually, while new Date() has seconds. 
-            // If user picks "now" (minute precision), it might be slightly behind real "now" (second precision).
-            // But if they pick a future minute, it is definitely future.
-            // we'll treat "now" as allowing up to current minute. 
+            evidenceDateField.addEventListener('input', function () {
+                const collectedDate = new Date(this.value);
+                const now = new Date();
 
-            // Compare timestamps
-            if (collectedDate.getTime() > now.getTime()) {
-                evErrorMsg.textContent = "Evidence collection time cannot exceed the current date and time.";
-                evErrorMsg.classList.remove('hidden');
-                this.classList.add('border-red-500');
-            } else {
-                // Check vs Incident
-                const incidentField = document.querySelector('[name="incident_date"]');
-                let incidentTime = null;
-                if (incidentField && incidentField.value) {
-                    incidentTime = new Date(incidentField.value);
-                }
-
-                if (incidentTime && collectedDate < incidentTime) {
-                    evErrorMsg.textContent = "Evidence cannot be collected before the incident occurred.";
+                // Allow up to current minute equality
+                if (collectedDate > now) {
+                    evErrorMsg.textContent = "Evidence collection date cannot be in the future.";
                     evErrorMsg.classList.remove('hidden');
                     this.classList.add('border-red-500');
                 } else {
-                    evErrorMsg.classList.add('hidden');
-                    this.classList.remove('border-red-500');
+                    const incidentField = document.querySelector('[name="incident_date"]');
+                    let incidentTime = null;
+                    if (incidentField && incidentField.value) {
+                        incidentTime = new Date(incidentField.value);
+                    }
+
+                    if (incidentTime && collectedDate < incidentTime) {
+                        evErrorMsg.textContent = "Evidence cannot be collected before the incident occurred.";
+                        evErrorMsg.classList.remove('hidden');
+                        this.classList.add('border-red-500');
+                    } else {
+                        evErrorMsg.classList.add('hidden');
+                        this.classList.remove('border-red-500');
+                    }
+                }
+            });
+        }
+
+        // 3. Location Auto-Suffix (MH26 Specific)
+        const locationField = document.querySelector('[name="location"]');
+        if (locationField) {
+            locationField.addEventListener('blur', function () {
+                let val = this.value.trim();
+                if (val && !val.toLowerCase().includes('nanded')) {
+                    this.value = `${val}, Nanded, Maharashtra`;
+                }
+            });
+        }
+
+        // 4. Auto-populate IPC Sections based on Offense Type
+        const offenseSelect = document.getElementById('offense_type');
+        const ipcField = document.getElementById('ipc_sections');
+        const cognizableField = document.getElementById('is_cognizable');
+
+        const ipcMapping = {
+            'Theft': '379',
+            'Burglary': '457, 380',
+            'Assault': '323, 336, 147',
+            'Cybercrime': '420; 66C, 66D IT Act',
+            'Fraud': '420',
+            'Homicide': '302',
+            'Drug': '20 NDPS Act',
+            'Other': ''
+        };
+
+        const cognizableMapping = {
+            'Theft': 'True',
+            'Burglary': 'True',
+            'Assault': 'True',
+            'Cybercrime': 'True',
+            'Fraud': 'True',
+            'Homicide': 'True',
+            'Drug': 'True',
+            'Other': 'True'
+        };
+
+        function updateOffenseDetails() {
+            if (!offenseSelect) return;
+            const selected = offenseSelect.value;
+            console.log("Selected Offense:", selected);
+
+            if (ipcField) {
+                if (ipcMapping[selected] !== undefined) {
+                    ipcField.value = ipcMapping[selected];
+                    ipcField.classList.add('bg-slate-600');
+                    setTimeout(() => ipcField.classList.remove('bg-slate-600'), 300);
+                } else {
+                    ipcField.value = '';
                 }
             }
-        });
-    }
 
-    // 3. Location Auto-Suffix (MH26 Specific)
-    const locationField = document.querySelector('[name="location"]');
-    if (locationField) {
-        locationField.addEventListener('blur', function () {
-            let val = this.value.trim();
-            if (val && !val.toLowerCase().includes('nanded')) {
-                this.value = `${val}, Nanded, Maharashtra`;
-            }
-        });
-    }
-
-    // 4. Auto-populate IPC Sections based on Offense Type
-    const offenseSelect = document.getElementById('offense_type');
-    const ipcField = document.getElementById('ipc_sections');
-    const cognizableField = document.getElementById('is_cognizable');
-
-    const ipcMapping = {
-        'Theft': '379',
-        'Burglary': '457, 380',
-        'Assault': '323, 336, 147',
-        'Cybercrime': '420; 66C, 66D IT Act',
-        'Fraud': '420',
-        'Homicide': '302',
-        'Drug': '20 NDPS Act',
-        'Other': ''
-    };
-
-    const cognizableMapping = {
-        'Theft': 'True',
-        'Burglary': 'True',
-        'Assault': 'True',
-        'Cybercrime': 'True',
-        'Fraud': 'True',
-        'Homicide': 'True',
-        'Drug': 'True',
-        'Other': 'True'
-    };
-
-    function updateOffenseDetails() {
-        if (!offenseSelect) return;
-        const selected = offenseSelect.value;
-        console.log("Selected Offense:", selected);
-
-        if (ipcField) {
-            if (ipcMapping[selected] !== undefined) {
-                ipcField.value = ipcMapping[selected];
-                ipcField.classList.add('bg-slate-600');
-                setTimeout(() => ipcField.classList.remove('bg-slate-600'), 300);
-            } else {
-                ipcField.value = '';
+            if (cognizableField) {
+                if (cognizableMapping[selected] !== undefined) {
+                    cognizableField.value = cognizableMapping[selected];
+                    cognizableField.classList.add('bg-slate-600');
+                    setTimeout(() => cognizableField.classList.remove('bg-slate-600'), 300);
+                }
             }
         }
 
-        if (cognizableField) {
-            if (cognizableMapping[selected] !== undefined) {
-                cognizableField.value = cognizableMapping[selected];
-                cognizableField.classList.add('bg-slate-600');
-                setTimeout(() => cognizableField.classList.remove('bg-slate-600'), 300);
+        if (offenseSelect) {
+            offenseSelect.addEventListener('change', updateOffenseDetails);
+
+            // Trigger on load if we have a selection and empty fields (or just force it for consistency)
+            // User feedback implies it should "be applied", so forcing it on load if values exist is safe.
+            if (offenseSelect.value) {
+                // Only auto-fill if IPC is empty to avoid overwriting user manual edits on re-render?
+                // But user says "according to Offense Type... applied", implying strict rule.
+                // Let's run it if IPC is empty.
+                if (ipcField && !ipcField.value) {
+                    updateOffenseDetails();
+                }
             }
         }
-    }
 
-    if (offenseSelect) {
-        offenseSelect.addEventListener('change', updateOffenseDetails);
-
-        // Trigger on load if we have a selection and empty fields (or just force it for consistency)
-        // User feedback implies it should "be applied", so forcing it on load if values exist is safe.
-        if (offenseSelect.value) {
-            // Only auto-fill if IPC is empty to avoid overwriting user manual edits on re-render?
-            // But user says "according to Offense Type... applied", implying strict rule.
-            // Let's run it if IPC is empty.
-            if (ipcField && !ipcField.value) {
-                updateOffenseDetails();
-            }
+        // 4. Initial Participant Row
+        if (document.getElementById('participants-container').children.length === 0) {
+            addParticipant();
         }
-    }
-
-    // 4. Initial Participant Row
-    if (document.getElementById('participants-container').children.length === 0) {
-        addParticipant();
-    }
     });
 
     function addParticipant() {

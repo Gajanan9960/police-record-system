@@ -6,7 +6,8 @@
 {% set values = form_data or {} %}
 <div class="max-w-3xl mx-auto">
     <div class="mb-6 text-center">
-        <h2 class="text-4xl font-bold bg-gradient-to-r from-cyan-400 to-cyan-300 bg-clip-text text-transparent flex items-center justify-center">
+        <h2
+            class="text-4xl font-bold bg-gradient-to-r from-cyan-400 to-cyan-300 bg-clip-text text-transparent flex items-center justify-center">
             <i class="fas fa-file-pen mr-3"></i>Update Police Report
         </h2>
         <p class="text-slate-400 mt-2">Modify incident report details</p>
@@ -20,19 +21,21 @@
                     <label class="block text-sm font-semibold text-slate-300 mb-2">
                         <i class="fas fa-hashtag mr-2 text-cyan-400"></i>Case Number
                     </label>
-                    <input type="text" name="case_number" value="{{ values.get('case_number', record.case_number) }}" required placeholder="e.g., CASE#001" 
-                           class="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all duration-300">
+                    <input type="text" name="case_number" value="{{ values.get('case_number', record.case_number) }}"
+                        required placeholder="e.g., CASE#001"
+                        class="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all duration-300">
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-slate-300 mb-2">
                         <i class="fas fa-triangle-exclamation mr-2 text-red-400"></i>Severity
                     </label>
                     {% set severity_value = values.get('severity', record.severity) %}
-                    <select name="severity" required class="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all duration-300">
+                    <select name="severity" required
+                        class="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all duration-300">
                         <option value="">Select severity level</option>
-                        <option value="low" {% if severity_value == 'low' %}selected{% endif %}>Low</option>
-                        <option value="medium" {% if severity_value == 'medium' %}selected{% endif %}>Medium</option>
-                        <option value="high" {% if severity_value == 'high' %}selected{% endif %}>High</option>
+                        <option value="low" {% if severity_value=='low' %}selected{% endif %}>Low</option>
+                        <option value="medium" {% if severity_value=='medium' %}selected{% endif %}>Medium</option>
+                        <option value="high" {% if severity_value=='high' %}selected{% endif %}>High</option>
                     </select>
                 </div>
             </div>
@@ -42,8 +45,9 @@
                 <label class="block text-sm font-semibold text-slate-300 mb-2">
                     <i class="fas fa-heading mr-2 text-cyan-400"></i>Report Title
                 </label>
-                <input type="text" name="title" value="{{ values.get('title', record.title) }}" required placeholder="Brief description of incident" 
-                       class="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all duration-300">
+                <input type="text" name="title" value="{{ values.get('title', record.title) }}" required
+                    placeholder="Brief description of incident"
+                    class="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all duration-300">
             </div>
 
             <!-- Description -->
@@ -51,8 +55,9 @@
                 <label class="block text-sm font-semibold text-slate-300 mb-2">
                     <i class="fas fa-align-left mr-2 text-cyan-400"></i>Detailed Description
                 </label>
-                <textarea name="description" required rows="4" placeholder="Provide a detailed description of the incident" 
-                          class="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all duration-300 resize-none">{{ values.get('description', record.description) }}</textarea>
+                <textarea name="description" required rows="4"
+                    placeholder="Provide a detailed description of the incident"
+                    class="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all duration-300 resize-none">{{ values.get('description', record.description) }}</textarea>
             </div>
 
             <!-- Suspect Row -->
@@ -61,15 +66,18 @@
                     <label class="block text-sm font-semibold text-slate-300 mb-2">
                         <i class="fas fa-user mr-2 text-cyan-400"></i>Suspect Name
                     </label>
-                    <input type="text" name="suspect_name" value="{{ values.get('suspect_name', record.suspect_name) }}" required placeholder="e.g, John Doe"
-                           class="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all duration-300">
+                    <input type="text" name="suspect_name" value="{{ values.get('suspect_name', record.suspect_name) }}"
+                        required placeholder="e.g, John Doe"
+                        class="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all duration-300">
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-slate-300 mb-2">
                         <i class="fas fa-cake-candles mr-2 text-cyan-400"></i>Suspect Age
                     </label>
-                    <input type="number" name="suspect_age" min="0" max="120" value="{{ values.get('suspect_age', record.suspect_age if record.suspect_age else '') }}" placeholder="e.g,25" 
-                           class="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all duration-300">
+                    <input type="number" name="suspect_age" min="0" max="120"
+                        value="{{ values.get('suspect_age', record.suspect_age if record.suspect_age else '') }}"
+                        placeholder="e.g,25"
+                        class="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all duration-300">
                 </div>
             </div>
 
@@ -79,15 +87,19 @@
                     <label class="block text-sm font-semibold text-slate-300 mb-2">
                         <i class="fas fa-person mr-2 text-amber-400"></i>Victim Name
                     </label>
-                    <input type="text" name="victim_name" value="{{ values.get('victim_name', record.victim_name if record.victim_name else '') }}" placeholder="e.g, John Doe" 
-                           class="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all duration-300">
+                    <input type="text" name="victim_name"
+                        value="{{ values.get('victim_name', record.victim_name if record.victim_name else '') }}"
+                        placeholder="e.g, John Doe"
+                        class="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all duration-300">
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-slate-300 mb-2">
                         <i class="fas fa-phone mr-2 text-amber-400"></i>Victim Contact Number
                     </label>
-                    <input type="tel" name="victim_contact" value="{{ values.get('victim_contact', record.victim_contact if record.victim_contact else '') }}" placeholder="10-digit number" pattern="\d{10}" title="Enter a 10-digit number"
-                           class="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all duration-300">
+                    <input type="tel" name="victim_contact"
+                        value="{{ values.get('victim_contact', record.victim_contact if record.victim_contact else '') }}"
+                        placeholder="10-digit number" pattern="\d{10}" title="Enter a 10-digit number"
+                        class="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all duration-300">
                 </div>
             </div>
 
@@ -97,15 +109,17 @@
                     <label class="block text-sm font-semibold text-slate-300 mb-2">
                         <i class="fas fa-map-pin mr-2 text-cyan-400"></i>Incident Location
                     </label>
-                    <input type="text" name="location" value="{{ values.get('location', record.location) }}" required 
-                           class="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all duration-300">
+                    <input type="text" name="location" value="{{ values.get('location', record.location) }}" required
+                        class="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all duration-300">
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-slate-300 mb-2">
                         <i class="fas fa-calendar mr-2 text-cyan-400"></i>Incident Date & Time
                     </label>
-                    <input type="datetime-local" name="incident_date" value="{{ values.get('incident_date', record.incident_date.strftime('%Y-%m-%dT%H:%M')) }}" required 
-                           class="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all duration-300">
+                    <input type="datetime-local" name="incident_date"
+                        value="{{ values.get('incident_date', record.incident_date.strftime('%Y-%m-%dT%H:%M')) }}"
+                        required
+                        class="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all duration-300">
                 </div>
             </div>
 
@@ -114,13 +128,13 @@
                 <label class="block text-sm font-semibold text-slate-300 mb-2">
                     <i class="fas fa-microscope mr-2 text-cyan-400"></i>Evidence
                 </label>
-                <textarea name="evidence" rows="3" placeholder="List all evidence collected at the scene" 
-                          class="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all duration-300 resize-none">{{ values.get('evidence', record.evidence if record.evidence else '') }}</textarea>
+                <textarea name="evidence" rows="3" placeholder="List all evidence collected at the scene"
+                    class="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all duration-300 resize-none">{{ values.get('evidence', record.evidence if record.evidence else '') }}</textarea>
             </div>
 
             <!-- Status Info -->
             <div class="p-4 bg-slate-800 border border-slate-700 rounded-lg">
-                <p class="text-sm text-slate-400"><span class="font-semibold">Current Status:</span> 
+                <p class="text-sm text-slate-400"><span class="font-semibold">Current Status:</span>
                     <span class="px-2 py-1 rounded text-xs font-medium
                         {% if record.status == 'pending' %}bg-orange-900 text-orange-200
                         {% elif record.status == 'approved' %}bg-green-900 text-green-200
@@ -128,15 +142,18 @@
                         {{ record.status.upper() }}
                     </span>
                 </p>
-                <p class="text-xs text-slate-500 mt-2">Last updated: {{ record.updated_at.strftime('%Y-%m-%d %H:%M') }}</p>
+                <p class="text-xs text-slate-500 mt-2">Last updated: {{ record.updated_at.strftime('%Y-%m-%d %H:%M') }}
+                </p>
             </div>
 
             <!-- Action Buttons -->
             <div class="flex gap-4 pt-4 border-t border-slate-700">
-                <button type="submit" class="flex-1 py-3 px-4 bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-white font-semibold rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-cyan-500/50 flex items-center justify-center">
+                <button type="submit"
+                    class="flex-1 py-3 px-4 bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-white font-semibold rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-cyan-500/50 flex items-center justify-center">
                     <i class="fas fa-save mr-2"></i>Update Report
                 </button>
-                <a href="{{ url_for('officer_dashboard') }}" class="flex-1 py-3 px-4 bg-slate-700 hover:bg-slate-600 text-white font-medium rounded-lg transition-all duration-300 text-center flex items-center justify-center">
+                <a href="{{ url_for('officer_dashboard') }}"
+                    class="flex-1 py-3 px-4 bg-slate-700 hover:bg-slate-600 text-white font-medium rounded-lg transition-all duration-300 text-center flex items-center justify-center">
                     <i class="fas fa-times mr-2"></i>Cancel
                 </a>
             </div>
