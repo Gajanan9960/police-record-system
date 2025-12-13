@@ -115,8 +115,10 @@ from app.models import FIR, Case
 
 @admin.route('/fir/<int:fir_id>/approve', methods=['POST'])
 @login_required
-@admin_required
 def approve_fir(fir_id):
+    if current_user.role not in ['admin', 'inspector']:
+        return render_template('403.html'), 403
+
     fir = FIR.query.get_or_404(fir_id)
     if fir.station_id != current_user.station_id:
         return render_template('403.html'), 403
@@ -129,14 +131,17 @@ def approve_fir(fir_id):
         fir.case.status = 'Open'
         
     db.session.commit()
-    log_audit('UPDATE', 'FIR', fir.id, f"FIR {fir.fir_number} approved by Admin")
+    log_audit('UPDATE', 'FIR', fir.id, f"FIR {fir.fir_number} approved by {current_user.role.capitalize()}")
     flash(f'FIR {fir.fir_number} approved.', 'success')
-    return redirect(url_for('dashboard.admin_dashboard'))
+    
+    return redirect(url_for('dashboard.inspector_dashboard') if current_user.role == 'inspector' else url_for('dashboard.admin_dashboard'))
 
 @admin.route('/fir/<int:fir_id>/reject', methods=['POST'])
 @login_required
-@admin_required
 def reject_fir(fir_id):
+    if current_user.role not in ['admin', 'inspector']:
+        return render_template('403.html'), 403
+
     fir = FIR.query.get_or_404(fir_id)
     if fir.station_id != current_user.station_id:
         return render_template('403.html'), 403
@@ -144,19 +149,25 @@ def reject_fir(fir_id):
     fir.status = 'Rejected'
     fir.approved_by_id = current_user.id
     db.session.commit()
-    log_audit('UPDATE', 'FIR', fir.id, f"FIR {fir.fir_number} rejected by Admin")
+    log_audit('UPDATE', 'FIR', fir.id, f"FIR {fir.fir_number} rejected by {current_user.role.capitalize()}")
     flash(f'FIR {fir.fir_number} rejected.', 'danger')
-    return redirect(url_for('dashboard.admin_dashboard'))
+    
+    return redirect(url_for('dashboard.inspector_dashboard') if current_user.role == 'inspector' else url_for('dashboard.admin_dashboard'))
 
 @admin.route('/case/<int:case_id>/assign', methods=['POST'])
 @login_required
-@admin_required
 def assign_io(case_id):
+    if current_user.role not in ['admin', 'inspector']:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+             return {'status': 'error', 'message': 'Access denied'}, 403
+        return render_template('403.html'), 403
+
     case = Case.query.get_or_404(case_id)
     if case.station_id != current_user.station_id:
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             return {'status': 'error', 'message': 'Access denied'}, 403
         return render_template('403.html'), 403
+
 
     io_id = request.form.get('io_id')
     
@@ -186,4 +197,4 @@ def assign_io(case_id):
             return {'status': 'error', 'message': 'Please select an IO.'}, 400
         flash('Please select an IO.', 'warning')
         
-    return redirect(url_for('dashboard.admin_dashboard'))
+    return redirect(url_for('dashboard.inspector_dashboard') if current_user.role == 'inspector' else url_for('dashboard.admin_dashboard'))

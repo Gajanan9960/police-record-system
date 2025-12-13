@@ -58,4 +58,10 @@ def create_app(config_class=Config):
     from app.admin import admin as admin_blueprint
     app.register_blueprint(admin_blueprint)
 
+    from app.tasks import tasks as tasks_blueprint
+    app.register_blueprint(tasks_blueprint)
+
+    from app.search import search as search_blueprint
+    app.register_blueprint(search_blueprint)
+    
     return app

@@ -50,6 +50,105 @@
                     </div>
                 </div>
 
+                <!-- Tasks Section (New) -->
+                <div>
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="text-lg font-semibold text-gray-200">Tasks / Assignments</h3>
+                        <!-- Permission Check for Assigning -->
+                        {% if current_user.role in ['admin', 'inspector'] or case.assigned_officer_id == current_user.id
+                        or current_user in case.officers %}
+                        <button onclick="document.getElementById('newTaskForm').classList.toggle('hidden')"
+                            class="text-cyan-400 hover:text-cyan-300 text-sm font-bold">
+                            <i class="fas fa-plus"></i> Assign Task
+                        </button>
+                        {% endif %}
+                    </div>
+
+                    <!-- New Task Form (Hidden by default) -->
+                    <div id="newTaskForm" class="hidden bg-slate-800 p-4 rounded border border-slate-600 mb-4">
+                        <form action="{{ url_for('tasks.create_task', case_id=case.id) }}" method="POST"
+                            class="space-y-3">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <div>
+                                <label class="block text-xs text-gray-400">Task Title</label>
+                                <input type="text" name="task_title" required
+                                    class="w-full bg-slate-700 text-white rounded px-2 py-1 border border-slate-600">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-400">Assign To</label>
+                                <select name="assigned_to_id" required
+                                    class="w-full bg-slate-700 text-white rounded px-2 py-1 border border-slate-600">
+                                    {% if case.assignee %}
+                                    <option value="{{ case.assignee.id }}">{{ case.assignee.full_name }} (Lead)</option>
+                                    {% endif %}
+                                    {% for off in case.officers %}
+                                    <option value="{{ off.id }}">{{ off.full_name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="block text-xs text-gray-400">Priority</label>
+                                    <select name="priority"
+                                        class="w-full bg-slate-700 text-white rounded px-2 py-1 border border-slate-600">
+                                        <option value="Medium">Medium</option>
+                                        <option value="High">High</option>
+                                        <option value="Low">Low</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-gray-400">Due Date</label>
+                                    <input type="date" name="due_date"
+                                        class="w-full bg-slate-700 text-white rounded px-2 py-1 border border-slate-600">
+                                </div>
+                            </div>
+                            <button type="submit"
+                                class="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-1 rounded">Assign</button>
+                        </form>
+                    </div>
+
+                    <!-- Task List -->
+                    {% if case.tasks %}
+                    <div class="space-y-3">
+                        {% for task in case.tasks %}
+                        <div class="bg-slate-700 p-3 rounded border-l-4 
+                            {% if task.status == 'Completed' %}border-green-500 opacity-75
+                            {% elif task.priority == 'High' %}border-red-500
+                            {% else %}border-blue-500{% endif %}">
+                            <div class="flex justify-between items-start">
+                                <h4 class="font-bold text-gray-200">{{ task.title }}</h4>
+                                <span class="text-xs px-2 py-0.5 rounded 
+                                    {% if task.status == 'Pending' %}bg-yellow-900 text-yellow-200
+                                    {% elif task.status == 'Completed' %}bg-green-900 text-green-200
+                                    {% else %}bg-blue-900 text-blue-200{% endif %}">
+                                    {{ task.status }}
+                                </span>
+                            </div>
+                            <p class="text-sm text-gray-400 mt-1">
+                                Assigned to: <span class="text-white">{{ task.assigned_to.full_name }}</span>
+                                {% if task.due_date %} | Due: {{ task.due_date.strftime('%Y-%m-%d') }}{% endif %}
+                            </p>
+
+                            <!-- Actions (Complete) -->
+                            {% if task.status != 'Completed' and (current_user.id == task.assigned_to_id or
+                            current_user.role in ['admin', 'inspector']) %}
+                            <form action="{{ url_for('tasks.update_task_status', task_id=task.id) }}" method="POST"
+                                class="mt-2">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <input type="hidden" name="status" value="Completed">
+                                <button type="submit" class="text-xs text-green-400 hover:text-green-300 font-bold">
+                                    <i class="fas fa-check"></i> Mark Complete
+                                </button>
+                            </form>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-gray-500 italic text-sm">No tasks assigned yet.</p>
+                    {% endif %}
+                </div>
+
                 <!-- Participants -->
                 <div>
                     <h3 class="text-lg font-semibold text-gray-200 mb-2">Participants</h3>

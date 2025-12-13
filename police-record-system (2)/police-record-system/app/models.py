@@ -246,3 +246,27 @@ class InvestigationUpdate(db.Model):
     
     station = db.relationship('Station', backref='updates')
     officer = db.relationship('User', foreign_keys=[officer_id])
+
+class Task(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    case_id = db.Column(db.Integer, db.ForeignKey('case.id'), nullable=False)
+    station_id = db.Column(db.Integer, db.ForeignKey('station.id'), nullable=False)
+    
+    title = db.Column(db.String(200), nullable=False)
+    description = db.Column(db.Text)
+    
+    assigned_to_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    assigned_by_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    
+    status = db.Column(db.String(50), default='Pending') # Pending, In Progress, Completed, Blocked
+    priority = db.Column(db.String(20), default='Medium') # Low, Medium, High
+    due_date = db.Column(db.Date)
+    
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    completed_at = db.Column(db.DateTime)
+    
+    # Relationships
+    case = db.relationship('Case', backref=db.backref('tasks', lazy=True))
+    station = db.relationship('Station', backref='tasks')
+    assigned_to = db.relationship('User', foreign_keys=[assigned_to_id], backref='tasks_assigned_to')
+    assigned_by = db.relationship('User', foreign_keys=[assigned_by_id], backref='tasks_created')

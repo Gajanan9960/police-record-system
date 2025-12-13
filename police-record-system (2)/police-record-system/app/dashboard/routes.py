@@ -49,11 +49,16 @@ def admin_dashboard():
                            active_cases=active_cases,
                            ios=assignable_officers)
 
+from sqlalchemy import or_
+
 @dashboard.route('/dashboard/officer')
 @login_required
 def officer_dashboard():
-    # Officer sees only assigned cases
-    my_cases = Case.query.filter_by(assigned_officer_id=current_user.id).all()
+    # Officer sees cases where they are Lead OR Team Member
+    my_cases = Case.query.filter(or_(
+        Case.assigned_officer_id == current_user.id,
+        Case.officers.any(id=current_user.id)
+    )).all()
     return render_template('officer_dashboard.html', cases=my_cases)
 
 @dashboard.route('/dashboard/inspector')
