@@ -75,3 +75,11 @@ def forward_fir(fir_id):
     db.session.commit()
     flash(f'FIR {fir.fir_number} forwarded to SHO.', 'success')
     return redirect(url_for('clerk.pending_firs'))
+
+@clerk.route('/dashboard')
+@login_required
+@roles_required('clerk')
+def dashboard():
+    # Fetch pending FIRs for the dashboard view
+    firs = FIR.query.filter_by(status='Pending').all()
+    return render_template('clerk_dashboard.html', firs=firs)

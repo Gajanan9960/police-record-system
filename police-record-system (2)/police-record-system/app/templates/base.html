@@ -34,19 +34,36 @@
                         class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium {{ 'border-b-2 border-cyan-400 text-white' if request.endpoint == 'admin.audit_logs' }}">Audit</a>
                     {% endif %}
 
-                    {% if current_user.role == 'inspector' %}
+                    {% if current_user.role in ['inspector', 'sho'] %}
                     <a href="{{ url_for('dashboard.inspector_dashboard') }}"
                         class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Dashboard</a>
                     {% endif %}
 
-                    {% if current_user.role == 'officer' or current_user.role == 'io' %}
+                    {% if current_user.role in ['officer', 'io'] %}
                     <a href="{{ url_for('dashboard.officer_dashboard') }}"
                         class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Dashboard</a>
                     {% endif %}
 
                     {% if current_user.role == 'clerk' %}
+                    <a href="{{ url_for('clerk.dashboard') }}"
+                        class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Dashboard</a>
                     <a href="{{ url_for('clerk.register_fir') }}"
                         class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Register FIR</a>
+                    {% endif %}
+
+                    {% if current_user.role == 'malkhana' %}
+                    <a href="{{ url_for('malkhana.dashboard') }}"
+                        class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Dashboard</a>
+                    {% endif %}
+
+                    {% if current_user.role == 'forensic' %}
+                    <a href="{{ url_for('forensic.dashboard') }}"
+                        class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Dashboard</a>
+                    {% endif %}
+
+                    {% if current_user.role == 'court' %}
+                    <a href="{{ url_for('court.dashboard') }}"
+                        class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Dashboard</a>
                     {% endif %}
 
                     <span class="text-gray-400 text-sm ml-4 mr-2">

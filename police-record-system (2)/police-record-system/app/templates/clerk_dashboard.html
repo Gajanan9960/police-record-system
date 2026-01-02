@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mx-auto px-4">
+    <h2 class="text-3xl font-bold text-cyan-400 mb-8">Clerk Dashboard</h2>
+
+    <!-- Clerk Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div class="bg-slate-800 rounded-lg p-6 border border-slate-700 shadow-lg">
+            <h3 class="text-gray-400 text-sm font-bold uppercase">Pending FIRs</h3>
+            <p class="text-3xl text-yellow-500 font-bold mt-2">{{ firs|length }}</p>
+            <p class="text-xs text-gray-500 mt-1">Require Forwarding</p>
+        </div>
+        <div class="bg-slate-800 rounded-lg p-6 border border-slate-700 shadow-lg cursor-pointer hover:bg-slate-750 transition"
+            onclick="window.location='{{ url_for('clerk.register_fir') }}'">
+            <h3 class="text-gray-400 text-sm font-bold uppercase">Quick Action</h3>
+            <p class="text-xl text-white font-bold mt-2"><i class="fas fa-plus mr-2"></i> Register New FIR</p>
+            <p class="text-xs text-gray-500 mt-1">Start a new record</p>
+        </div>
+    </div>
+
+    <!-- Pending FIRs Action List -->
+    <div class="bg-slate-800 rounded-lg shadow border border-slate-700 overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-700 flex justify-between items-center">
+            <h3 class="text-xl font-bold text-white">Pending FIRs (Awaiting Forwarding)</h3>
+            <span class="text-sm text-gray-400">Total: {{ firs|length }}</span>
+        </div>
+        {% if firs %}
+        <table class="min-w-full leading-normal">
+            <thead>
+                <tr>
+                    <th
+                        class="px-5 py-3 border-b-2 border-slate-700 bg-slate-900 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                        FIR #</th>
+                    <th
+                        class="px-5 py-3 border-b-2 border-slate-700 bg-slate-900 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                        Date</th>
+                    <th
+                        class="px-5 py-3 border-b-2 border-slate-700 bg-slate-900 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                        Filed By</th>
+                    <th
+                        class="px-5 py-3 border-b-2 border-slate-700 bg-slate-900 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                        Status</th>
+                    <th
+                        class="px-5 py-3 border-b-2 border-slate-700 bg-slate-900 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                        Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for fir in firs %}
+                <tr>
+                    <td class="px-5 py-5 border-b border-slate-700 bg-slate-800 text-sm text-gray-300">{{ fir.fir_number
+                        }}</td>
+                    <td class="px-5 py-5 border-b border-slate-700 bg-slate-800 text-sm text-gray-300">{{
+                        fir.created_at.strftime('%Y-%m-%d') }}</td>
+                    <td class="px-5 py-5 border-b border-slate-700 bg-slate-800 text-sm text-gray-300">{{
+                        fir.filer.full_name }}</td>
+                    <td class="px-5 py-5 border-b border-slate-700 bg-slate-800 text-sm">
+                        <span
+                            class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Pending</span>
+                    </td>
+                    <td class="px-5 py-5 border-b border-slate-700 bg-slate-800 text-sm">
+                        <form action="{{ url_for('clerk.forward_fir', fir_id=fir.id) }}" method="POST" class="inline">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                            <button type="submit"
+                                class="bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-1 px-3 rounded text-xs">
+                                <i class="fas fa-paper-plane mr-1"></i> Forward to SHO
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="p-6 text-center text-gray-500">
+            <i class="fas fa-check-circle text-4xl text-gray-600 mb-4 block"></i>
+            No pending FIRs. All records forwarded.
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

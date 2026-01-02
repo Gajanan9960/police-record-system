@@ -19,8 +19,16 @@ def login():
             if not next_page or not next_page.startswith('/'):
                 if user.role == 'admin':
                     next_page = url_for('dashboard.admin_dashboard')
-                elif user.role == 'inspector':
+                elif user.role in ['inspector', 'sho']:
                     next_page = url_for('dashboard.inspector_dashboard')
+                elif user.role == 'clerk':
+                    next_page = url_for('clerk.dashboard')
+                elif user.role == 'malkhana':
+                    next_page = url_for('malkhana.dashboard')
+                elif user.role == 'forensic':
+                    next_page = url_for('forensic.dashboard')
+                elif user.role == 'court':
+                    next_page = url_for('court.dashboard')
                 else:
                     next_page = url_for('dashboard.officer_dashboard')
             return redirect(next_page)
