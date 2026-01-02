@@ -2,7 +2,7 @@ from flask import render_template, redirect, url_for, flash, request
 from flask_login import login_user, logout_user, login_required, current_user
 from app import db
 from app.auth import auth
-from app.forms import LoginForm, RegistrationForm
+from app.forms import LoginForm, RegistrationForm, RequestResetForm, ResetPasswordForm
 from app.models import User
 
 @auth.route('/login', methods=['GET', 'POST'])
@@ -58,6 +58,31 @@ def logout():
     logout_user()
     return redirect(url_for('main.index'))
 
-@auth.route('/forgot_password')
+@auth.route('/forgot_password', methods=['GET', 'POST'])
 def forgot_password():
-    return render_template('forgot_password.html', title='Forgot Password')
+    if current_user.is_authenticated:
+        return redirect(url_for('main.index'))
+    form = RequestResetForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data).first()
+        token = user.get_reset_token()
+        msg = f"To reset your password, visit the following link: {url_for('auth.reset_token', token=token, _external=True)}"
+        flash(msg, 'info')
+        return redirect(url_for('auth.login'))
+    return render_template('forgot_password.html', title='Reset Password', form=form)
+
+@auth.route('/reset_password/<token>', methods=['GET', 'POST'])
+def reset_token(token):
+    if current_user.is_authenticated:
+        return redirect(url_for('main.index'))
+    user = User.verify_reset_token(token)
+    if user is None:
+        flash('That is an invalid or expired token', 'warning')
+        return redirect(url_for('auth.forgot_password'))
+    form = ResetPasswordForm()
+    if form.validate_on_submit():
+        user.set_password(form.password.data)
+        db.session.commit()
+        flash('Your password has been updated! You are now able to log in', 'success')
+        return redirect(url_for('auth.login'))
+    return render_template('reset_password.html', title='Reset Password', form=form)
