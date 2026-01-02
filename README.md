@@ -346,7 +346,7 @@ If you are using migrations:
 
 ## 🧪 Testing
 
-> Add real test commands once tests exist.
+
 
 If you use **pytest**:
 
@@ -469,9 +469,6 @@ Please keep the code clean, documented, and (if possible) covered by tests.
 
 ## 📄 License
 
-> TODO: Choose and specify a license (e.g., MIT, Apache-2.0, GPL) or state “All rights reserved”.
-
-For example:
 
 This project is licensed under the **MIT License**.  
 See the [LICENSE](LICENSE) file for details.
